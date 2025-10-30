@@ -1,0 +1,25 @@
+we are looping rows and uploading the row one by one
+
+first setting difficulty_level
+
+based on that calculating formatFailCount
+
+then sending program_name and fetching program_id
+if found use it otherwise create new program
+
+then sending course_name and fetching course_id
+if found use it otherwise create new course
+
+then sending subject_name and fetching subject_id
+if found use it otherwise create new subject
+ 
+then inserting questions with all ids
+
+and then options with question_id
+
+new approach
+
+gather unique program, course and subject names and send a get query in db to find their ids
+
+then we will map those ids with names
+
