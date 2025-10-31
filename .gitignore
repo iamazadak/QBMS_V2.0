@@ -15,6 +15,7 @@ yarn-error.log*
 # IDEs and editors
 .vscode/
 .idea/
+.vercel/
 
 # Obsolete directories
 /supabase/
