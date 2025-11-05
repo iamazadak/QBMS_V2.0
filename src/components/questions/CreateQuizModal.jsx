@@ -348,16 +348,19 @@ export default function CreateQuizModal({
               correctAnswer: ["Confirmed"],
               points: 0
             },
-            ...selectedQuestions.map((q, index) => ({
-              questionText: q.question_text,
-              questionType: q.type || "multiple_choice",
-              isRequired: true,
-              responseOptions: q.options || [],
-              correctAnswer: q.correct_answer || "",
-              points: q.positive_marks || 1,
-              feedback: q.feedback || { correct: "Correct!", incorrect: "Please review the material." },
-              validation: q.validation
-            }))
+            ...selectedQuestions.map((q, index) => {
+              const correctOption = (q.options || []).find(opt => opt.is_correct);
+              return {
+                questionText: q.question_text,
+                questionType: q.type || "multiple_choice",
+                isRequired: true,
+                options: (q.options || []).map(opt => opt.option_text),
+                correctAnswer: correctOption ? correctOption.option_text : "",
+                points: q.positive_marks || 1,
+                feedback: q.feedback || { correct: "Correct!", incorrect: "Please review the material." },
+                validation: q.validation
+              };
+            })
           ]
         };
 
