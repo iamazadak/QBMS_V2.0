@@ -362,6 +362,7 @@ export default function CreateQuizModal({
         };
 
         // Call the Vercel proxy function
+        console.log("googleFormData", googleFormData);
         const response = await axios.post('/api/google-form-proxy', googleFormData);
         const result = response.data;
 

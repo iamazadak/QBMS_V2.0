@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Google Apps Script Test</title>
+</head>
+<body>
+  <h1>Google Apps Script Test</h1>
+  <p>Open the developer console (F12) to see the result of the test.</p>
+
+  <script>
+    const url = '/api/google-form-proxy';
+    const data = {
+      formTitle: 'Test Form',
+      questions: [
+        {
+          questionText: 'What is your name?',
+          options: ['A', 'B', 'C'],
+          correctAnswer: 'A',
+          points: 1
+        }
+      ]
+    };
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(data => console.log('Success:', data))
+    .catch(error => console.error('Error:', error));
+  </script>
+</body>
+</html>

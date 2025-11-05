@@ -223,53 +223,6 @@ initPagination();
   </div>
 </div>
 
-<!-- Create Quiz Modal -->
-<div id="createQuizModal" class="modal">
-  <div class="modal-content">
-    <h2>Create Quiz</h2>
-    <form id="createQuizForm" class="form-grid">
-      <div class="form-row">
-        <label>Quiz Title</label>
-        <input type="text" id="quiz-title" required />
-      </div>
-      <div class="form-row">
-        <label>Total Marks (Auto-calculated)</label>
-        <input type="number" id="quiz-total-marks" readonly />
-      </div>
-      <div class="form-row">
-        <label>No. of Questions</label>
-        <input type="number" id="quiz-num-questions" readonly />
-      </div>
-      <div class="form-row">
-        <label>Points per Question</label>
-        <input type="number" id="quiz-points-per-question" required value="1" />
-      </div>
-      <div class="form-row">
-        <label>Quiz Duration (minutes)</label>
-        <input type="number" id="quiz-duration" required />
-      </div>
-      <div class="form-row">
-        <label>Start Date/Time</label>
-        <input type="datetime-local" id="quiz-start-date" required />
-      </div>
-      <div class="form-row">
-        <label>End Date/Time</label>
-        <input type="datetime-local" id="quiz-end-date" required />
-      </div>
-      <div class="form-row">
-        <label>Quiz Status</label>
-        <select id="quiz-status" required>
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-        </select>
-      </div>
-      <div class="modal-actions">
-        <button type="submit" class="btn btn-primary">Create</button>
-        <button type="button" id="closeCreateQuizModal" class="btn">Cancel</button>
-      </div>
-    </form>
-  </div>
-</div>
 
 </body>
 </html>
