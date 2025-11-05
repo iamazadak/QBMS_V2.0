@@ -1,5 +1,4 @@
-
-import { post } from 'axios';
+import axios from 'axios';
 
 export default async (req, res) => {
   // Set CORS headers to allow requests from your frontend
@@ -25,7 +24,7 @@ export default async (req, res) => {
     console.log("Request Body:", req.body);
 
     try {
-      const response = await post(googleScriptUrl, req.body);
+      const response = await axios.post(googleScriptUrl, req.body);
       res.status(200).json(response.data);
     } catch (error) {
       console.error("Error calling Google Apps Script:", error.response ? error.response.data : error.message);
