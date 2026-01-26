@@ -21,9 +21,12 @@ export default async (req, res) => {
   }
 
   try {
-    const googleScriptUrl = 'https://script.google.com/a/macros/gramtarang.org.in/s/AKfycbx6KmjnR5lBas-Dr6F7aC4YhUEuVH8jgPLhO6GUr8PRDd_xXmis71kHjMUR3iZz0bsj/exec';
+    const googleScriptUrl = process.env.APPS_SCRIPT_URL;
+    if (!googleScriptUrl) {
+      throw new Error("APPS_SCRIPT_URL environment variable is not set.");
+    }
 
-    console.log("Proxying to Google Script:", googleScriptUrl);
+    console.log("Proxying to Google Script...");
 
     try {
       const response = await axios.post(googleScriptUrl, req.body);
