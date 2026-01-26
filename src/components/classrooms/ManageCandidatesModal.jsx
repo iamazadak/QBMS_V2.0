@@ -26,7 +26,7 @@ export default function ManageCandidatesModal({ isOpen, onClose, classroom, onUp
 
   const loadData = useCallback(async () => {
     if (!classroom) return;
-   
+
     try {
       // Load all candidates and classroom candidates
       const [allCands, classroomCands] = await Promise.all([
@@ -114,7 +114,7 @@ export default function ManageCandidatesModal({ isOpen, onClose, classroom, onUp
   const filteredAvailableCandidates = allCandidates.filter(candidate => {
     const alreadyInClassroom = classroomCandidates.some(cc => cc.id === candidate.id);
     const matchesSearch = candidate.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         candidate.email?.toLowerCase().includes(searchTerm.toLowerCase());
+      candidate.email?.toLowerCase().includes(searchTerm.toLowerCase());
     return !alreadyInClassroom && matchesSearch;
   });
 
@@ -241,7 +241,7 @@ export default function ManageCandidatesModal({ isOpen, onClose, classroom, onUp
                       size="sm"
                       onClick={handleAddCandidates}
                       disabled={isLoading}
-                      className="bg-blue-600 hover:bg-blue-700"
+                      className="bg-teal-600 hover:bg-teal-700"
                     >
                       <UserPlus className="w-4 h-4 mr-1" />
                       {isLoading ? "Adding..." : "Add Selected"}

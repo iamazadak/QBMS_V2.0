@@ -9,11 +9,17 @@ export function HomeRedirect() {
 
   useEffect(() => {
     if (!authLoading && !profileLoading) {
-      if (user) {
-        if (profile?.role === 'admin') {
+      if (user && profile) {
+        console.log("Redirecting based on role:", profile.role);
+        const role = profile.role?.toLowerCase();
+
+        if (role === 'admin') {
           navigate('/admin', { replace: true });
+        } else if (role === 'trainer') {
+          navigate('/dashboard', { replace: true });
         } else {
-          navigate('/student', { replace: true }); // Assuming /dashboard is the student's default
+          // Default to student if role is student or unrecognized
+          navigate('/student', { replace: true });
         }
       } else {
         navigate('/login', { replace: true });

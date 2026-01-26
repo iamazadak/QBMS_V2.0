@@ -33,14 +33,14 @@ export default function ReportedQuestionsPage() {
     setIsLoading(true);
     try {
       const reportsData = await ReportedQuestion.list("-created_date");
-     
+
       // Load question details for each report
       const reportsWithDetails = await Promise.all(
         reportsData.map(async (report) => {
           try {
             const question = await Question.get(report.question_id);
             const options = await Option.filter({ question_id: question.id });
-           
+
             return {
               ...report,
               question: {
@@ -57,7 +57,7 @@ export default function ReportedQuestionsPage() {
           }
         })
       );
-     
+
       setReports(reportsWithDetails.filter(r => r.question !== null));
     } catch (error) {
       console.error("Error loading reports:", error);
@@ -82,10 +82,10 @@ export default function ReportedQuestionsPage() {
       report.question?.question_text?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       report.reporter_email?.toLowerCase().includes(searchTerm.toLowerCase());
-   
+
     const matchesStatus = statusFilter === "all" || report.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || report.priority === priorityFilter;
-   
+
     return matchesSearch && matchesStatus && matchesPriority;
   });
 
@@ -142,7 +142,7 @@ export default function ReportedQuestionsPage() {
     return (
       <div className="p-6 max-w-7xl mx-auto">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4">Loading reported questions...</p>
         </div>
       </div>
@@ -161,62 +161,72 @@ export default function ReportedQuestionsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-        <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none">
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100">Total Reports</p>
-                <p className="text-2xl font-bold">{stats.total}</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-violet-50 rounded-xl">
+                <AlertTriangle className="w-6 h-6 text-violet-600" />
               </div>
-              <AlertTriangle className="w-8 h-8 text-blue-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Total Reports</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.total}</p>
             </div>
           </CardContent>
         </Card>
-       
-        <Card className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white border-none">
+
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-yellow-100">Pending</p>
-                <p className="text-2xl font-bold">{stats.pending}</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-amber-50 rounded-xl">
+                <Clock className="w-6 h-6 text-amber-600" />
               </div>
-              <Clock className="w-8 h-8 text-yellow-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Pending</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.pending}</p>
             </div>
           </CardContent>
         </Card>
-       
-        <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none">
+
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100">Reviewing</p>
-                <p className="text-2xl font-bold">{stats.reviewing}</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-orange-50 rounded-xl">
+                <Eye className="w-6 h-6 text-orange-600" />
               </div>
-              <Eye className="w-8 h-8 text-blue-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Reviewing</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.reviewing}</p>
             </div>
           </CardContent>
         </Card>
-       
-        <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-none">
+
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100">Resolved</p>
-                <p className="text-2xl font-bold">{stats.resolved}</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-emerald-50 rounded-xl">
+                <CheckCircle className="w-6 h-6 text-emerald-600" />
               </div>
-              <CheckCircle className="w-8 h-8 text-green-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Resolved</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.resolved}</p>
             </div>
           </CardContent>
         </Card>
-       
-        <Card className="bg-gradient-to-r from-red-500 to-red-600 text-white border-none">
+
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-red-100">High Priority</p>
-                <p className="text-2xl font-bold">{stats.highPriority}</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-rose-50 rounded-xl">
+                <AlertTriangle className="w-6 h-6 text-rose-600" />
               </div>
-              <AlertTriangle className="w-8 h-8 text-red-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">High Priority</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.highPriority}</p>
             </div>
           </CardContent>
         </Card>
@@ -234,7 +244,7 @@ export default function ReportedQuestionsPage() {
             className="pl-10"
           />
         </div>
-       
+
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-full md:w-40">
             <SelectValue placeholder="Status" />
@@ -247,7 +257,7 @@ export default function ReportedQuestionsPage() {
             <SelectItem value="dismissed">Dismissed</SelectItem>
           </SelectContent>
         </Select>
-       
+
         <Select value={priorityFilter} onValueChange={setPriorityFilter}>
           <SelectTrigger className="w-full md:w-40">
             <SelectValue placeholder="Priority" />
@@ -290,22 +300,22 @@ export default function ReportedQuestionsPage() {
                         {getIssueTypeLabel(report.issue_type)}
                       </Badge>
                     </div>
-                   
+
                     <h3 className="font-semibold text-slate-900 mb-2 line-clamp-2">
                       {report.question?.question_text}
                     </h3>
-                   
+
                     <p className="text-slate-600 text-sm mb-3 line-clamp-2">
                       <strong>Issue:</strong> {report.description}
                     </p>
-                   
+
                     <div className="flex items-center gap-4 text-xs text-slate-500">
                       <span>Reported by: {report.reporter_email}</span>
                       <span>•</span>
                       <span>{new Date(report.created_date).toLocaleDateString()}</span>
                     </div>
                   </div>
-                 
+
                   <div className="flex flex-col gap-2">
                     <Button
                       variant="outline"
@@ -318,7 +328,7 @@ export default function ReportedQuestionsPage() {
                       <Eye className="w-4 h-4 mr-2" />
                       View Details
                     </Button>
-                   
+
                     <div className="flex gap-2">
                       {report.status === 'pending' && (
                         <Button
@@ -329,7 +339,7 @@ export default function ReportedQuestionsPage() {
                           Start Review
                         </Button>
                       )}
-                     
+
                       {report.status === 'reviewing' && (
                         <>
                           <Button
@@ -402,11 +412,10 @@ function ReportDetailView({ report }) {
             {report.question?.options?.map((option, index) => (
               <div
                 key={index}
-                className={`p-2 rounded border text-sm ${
-                  option.is_correct
-                    ? 'bg-green-50 border-green-200 text-green-800'
-                    : 'bg-white border-slate-200'
-                }`}
+                className={`p-2 rounded border text-sm ${option.is_correct
+                  ? 'bg-green-50 border-green-200 text-green-800'
+                  : 'bg-white border-slate-200'
+                  }`}
               >
                 <span className="font-medium">{option.option_label}:</span> {option.option_text}
               </div>
@@ -431,7 +440,7 @@ function ReportDetailView({ report }) {
             <p><strong>Issue Type:</strong> {report.issue_type.replace('_', ' ')}</p>
           </div>
         </div>
-       
+
         {report.admin_notes && (
           <div>
             <h3 className="font-semibold mb-2">Admin Notes:</h3>

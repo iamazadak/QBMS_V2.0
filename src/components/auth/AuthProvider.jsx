@@ -10,11 +10,23 @@ export function AuthProvider({ children }) {
   const location = useLocation();
 
   useEffect(() => {
-    if (!loading && user && location.pathname === '/login') {
-      if (profile?.role === 'admin') {
-        navigate('/admin');
+    if (!loading) {
+      if (user) {
+        if (location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/') {
+          if (profile?.role === 'admin') {
+            navigate('/admin');
+          } else if (profile?.role === 'trainer') {
+            navigate('/dashboard');
+          } else {
+            navigate('/student');
+          }
+        }
       } else {
-        navigate('/student');
+        // Not logged in - redirect to login if on a protected route
+        const publicRoutes = ['/login', '/signup', '/forgot-password', '/reset-password'];
+        if (!publicRoutes.includes(location.pathname)) {
+          navigate('/login');
+        }
       }
     }
   }, [user, loading, profile, navigate, location.pathname]);

@@ -62,7 +62,7 @@ export default function CreateSessionModal({ isOpen, onClose, programs, courses,
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-   
+
     if (!formData.title || !formData.instructor_name || !formData.scheduled_date) {
       alert("Please fill in all required fields");
       return;
@@ -101,7 +101,7 @@ export default function CreateSessionModal({ isOpen, onClose, programs, courses,
     // This is a placeholder - in production, this would call Zoom API
     const mockMeetingId = Math.floor(100000000 + Math.random() * 900000000);
     const mockPassword = Math.random().toString(36).substring(7);
-   
+
     setFormData({
       ...formData,
       zoom_meeting_id: mockMeetingId.toString(),
@@ -123,7 +123,7 @@ export default function CreateSessionModal({ isOpen, onClose, programs, courses,
 
 
         <Alert className="bg-blue-50 border-blue-200">
-          <AlertCircle className="h-4 w-4 text-blue-600" />
+          <AlertCircle className="h-4 w-4 text-teal-600" />
           <AlertDescription className="text-blue-800">
             <strong>Note:</strong> To enable actual Zoom API integration, please enable backend functions in Dashboard → Settings.
             Currently using mock Zoom meeting generation for demonstration.
@@ -170,7 +170,7 @@ export default function CreateSessionModal({ isOpen, onClose, programs, courses,
                 className="mt-1"
               />
             </div>
-           
+
             <div>
               <Label htmlFor="instructor_email">Instructor Email</Label>
               <Input
@@ -205,7 +205,7 @@ export default function CreateSessionModal({ isOpen, onClose, programs, courses,
                 </SelectContent>
               </Select>
             </div>
-           
+
             <div>
               <Label htmlFor="course">Course</Label>
               <Select
@@ -224,7 +224,7 @@ export default function CreateSessionModal({ isOpen, onClose, programs, courses,
                 </SelectContent>
               </Select>
             </div>
-           
+
             <div>
               <Label htmlFor="subject">Subject</Label>
               <Select
@@ -267,7 +267,7 @@ export default function CreateSessionModal({ isOpen, onClose, programs, courses,
                 </PopoverContent>
               </Popover>
             </div>
-           
+
             <div>
               <Label htmlFor="duration">Duration (minutes)</Label>
               <Input

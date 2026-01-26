@@ -63,10 +63,45 @@ class SupabaseEntity {
     if (error) throw error;
     return { success: true };
   }
+
+  async getUniqueValues(column) {
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select(column);
+    if (error) throw error;
+    return [...new Set(data.map(item => item[column]))].filter(Boolean);
+  }
 }
 
 export class Question extends SupabaseEntity {
   constructor() { super('questions'); }
+
+  async listWithDetails(sortBy = 'created_at', ascending = false) {
+    // Nested query: Questions -> Subjects -> Courses -> Programs
+    const { data, error } = await supabase
+      .from(this.tableName)
+      .select('*, options(*), subjects(*, courses(*, programs(*)))')
+      .order(sortBy, { ascending });
+
+    if (error) throw error;
+
+    // Flatten nested structure
+    return data.map(q => {
+      // Safe access to nested properties
+      const subject = q.subjects;
+      // Note: 'subjects' here is an object object if relation is 1-to-1 or N-to-1
+      // If it returns an array, we'd need subject[0].
+      const course = subject?.courses;
+      const program = course?.programs;
+
+      return {
+        ...q,
+        subject: subject,
+        course: course,
+        program: program
+      };
+    });
+  }
 }
 export class Option extends SupabaseEntity {
   constructor() { super('options'); }
@@ -265,4 +300,12 @@ export class QuestionPaperQuestion extends SupabaseEntity {
 
 export class ExamSection extends SupabaseEntity {
   constructor() { super('exam_sections'); }
+}
+
+export class Role extends SupabaseEntity {
+  constructor() { super('roles'); }
+}
+
+export class Permission extends SupabaseEntity {
+  constructor() { super('permissions'); }
 }

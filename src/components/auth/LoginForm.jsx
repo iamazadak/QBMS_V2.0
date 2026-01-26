@@ -6,7 +6,10 @@ import { motion } from 'framer-motion';
 import { Mail, Lock } from 'lucide-react';
 import { ForgotPasswordModal } from './ForgotPasswordModal';
 
+import { useNavigate } from 'react-router-dom';
+
 export function LoginForm() {
+  const navigate = useNavigate();
   const { signIn } = useAuth();
   const { profile, loading } = useProfile();
   const [email, setEmail] = useState('');
@@ -15,12 +18,28 @@ export function LoginForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage(''); // Clear previous messages
     try {
-      const { error } = await signIn(email, password);
-      if (error) throw error;
-      setMessage(`Login successful! Welcome, ${profile?.full_name} (${profile?.role}).`);
+      const { data, error } = await signIn(email, password);
+
+      if (error) {
+        // Handle specific Supabase error if available
+        if (error.message.includes('Email not confirmed')) {
+          setMessage('Login failed. Please verify your email first.');
+        } else if (error.message.includes('Invalid login credentials')) {
+          setMessage('Login failed. Check your email or password.');
+        } else {
+          setMessage(`Login failed: ${error.message}`);
+        }
+        return;
+      }
+
+      // If no error, we still wait for the profile to be updated via useProfile (which uses useAuth's user)
+      setMessage('Login successful! Redirecting...');
+      setTimeout(() => navigate('/'), 1000);
     } catch (error) {
-      setMessage('Login failed. Check credentials or verify email.');
+      console.error('Login error:', error);
+      setMessage('An unexpected error occurred during login.');
     }
   };
 
@@ -28,7 +47,7 @@ export function LoginForm() {
     <motion.form
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex flex-col items-center justify-center h-full p-6 bg-white"
+      className="flex flex-col items-center justify-start h-full p-6 pt-4 bg-white"
       onSubmit={handleSubmit}
     >
       <h1 className="text-3xl font-bold mb-2">Sign In</h1>
@@ -55,7 +74,7 @@ export function LoginForm() {
           required
         />
       </div>
-      <Button type="submit" disabled={loading} className="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full">
+      <Button type="submit" disabled={loading} className="w-full text-white font-bold py-2 px-4 rounded-full" style={{ backgroundColor: '#008080' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#006666'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#008080'}>
         {loading ? 'Signing in...' : 'Sign In'}
       </Button>
       <div className="w-full flex justify-center mt-4">

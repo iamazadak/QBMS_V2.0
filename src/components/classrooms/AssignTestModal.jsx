@@ -141,7 +141,7 @@ export default function AssignTestModal({ isOpen, onClose, selectedClassrooms, o
         for (const classroomCandidate of classroomCandidates) {
           try {
             const candidate = await Candidate.get(classroomCandidate.candidate_id);
-           
+
             // Send email notification
             if (notificationMethods.email && candidate.email) {
               try {
@@ -171,7 +171,7 @@ Best regards,
 Lernern Team
                   `.trim()
                 });
-               
+
                 totalStudentsNotified++;
               } catch (emailError) {
                 console.error(`Failed to send email to ${candidate.email}:`, emailError);
@@ -225,7 +225,7 @@ Lernern Team
 
 
         <Alert className="bg-blue-50 border-blue-200">
-          <AlertCircle className="h-4 w-4 text-blue-600" />
+          <AlertCircle className="h-4 w-4 text-teal-600" />
           <AlertDescription className="text-blue-800">
             <strong>Note:</strong> Email notifications will be sent automatically to all students in the selected classrooms.
             For SMS and WhatsApp notifications, enable backend functions in Dashboard → Settings.
@@ -255,31 +255,31 @@ Lernern Team
                 <Checkbox
                   id="email"
                   checked={notificationMethods.email}
-                  onCheckedChange={(checked) => setNotificationMethods({...notificationMethods, email: checked})}
+                  onCheckedChange={(checked) => setNotificationMethods({ ...notificationMethods, email: checked })}
                 />
                 <Mail className="w-4 h-4 text-slate-500" />
                 <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                   Email (Available now)
                 </label>
               </div>
-             
+
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="sms"
                   checked={notificationMethods.sms}
-                  onCheckedChange={(checked) => setNotificationMethods({...notificationMethods, sms: checked})}
+                  onCheckedChange={(checked) => setNotificationMethods({ ...notificationMethods, sms: checked })}
                 />
                 <Phone className="w-4 h-4 text-slate-500" />
                 <label htmlFor="sms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                   SMS (Requires backend functions)s
                 </label>
               </div>
-             
+
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="whatsapp"
                   checked={notificationMethods.whatsapp}
-                  onCheckedChange={(checked) => setNotificationMethods({...notificationMethods, whatsapp: checked})}
+                  onCheckedChange={(checked) => setNotificationMethods({ ...notificationMethods, whatsapp: checked })}
                 />
                 <MessageSquare className="w-4 h-4 text-slate-500" />
                 <label htmlFor="whatsapp" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -323,7 +323,7 @@ Lernern Team
                 className="pl-10"
               />
             </div>
-           
+
             <Select value={programFilter} onValueChange={setProgramFilter}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Program" />
@@ -335,7 +335,7 @@ Lernern Team
                 ))}
               </SelectContent>
             </Select>
-           
+
             <Select value={courseFilter} onValueChange={setCourseFilter}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Course" />
@@ -347,7 +347,7 @@ Lernern Team
                 ))}
               </SelectContent>
             </Select>
-           
+
             <Select value={subjectFilter} onValueChange={setSubjectFilter}>
               <SelectTrigger className="w-40">
                 <SelectValue placeholder="Subject" />
@@ -373,9 +373,8 @@ Lernern Team
               filteredExams.map(exam => (
                 <Card
                   key={exam.id}
-                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                    selectedExam?.id === exam.id ? 'ring-2 ring-blue-500 bg-blue-50' : ''
-                  }`}
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-md ${selectedExam?.id === exam.id ? 'ring-2 ring-teal-500 bg-teal-50' : ''
+                    }`}
                   onClick={() => setSelectedExam(exam)}
                 >
                   <CardContent className="p-4">
@@ -384,20 +383,20 @@ Lernern Team
                         {exam.exam_type?.replace('_', ' ').toUpperCase()}
                       </Badge>
                       {selectedExam?.id === exam.id && (
-                        <CheckCircle className="w-5 h-5 text-blue-600" />
+                        <CheckCircle className="w-5 h-5 text-teal-600" />
                       )}
                     </div>
-                   
+
                     <h3 className="font-semibold text-slate-900 mb-1 line-clamp-2">
                       {exam.title}
                     </h3>
-                   
+
                     {exam.description && (
                       <p className="text-sm text-slate-600 mb-3 line-clamp-2">
                         {exam.description}
                       </p>
                     )}
-                   
+
                     <div className="space-y-1 text-xs text-slate-500">
                       <div className="flex items-center gap-1">
                         <FileText className="w-3 h-3" />

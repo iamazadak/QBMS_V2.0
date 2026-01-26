@@ -123,7 +123,7 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
             }
             cache.courses.set(courseKey, courseId);
           }
-         
+
           // 3. Subject
           const subjectKey = `${courseId}_${rowData.subject_name}`;
           let subjectId = cache.subjects.get(subjectKey);
@@ -193,13 +193,13 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
       setIsUploading(false);
     };
   };
- 
+
   const resetState = () => {
     setFile(null);
     setIsUploading(false);
     setUploadStatus({ total: 0, success: 0, failed: 0, errors: [] });
   };
- 
+
   const handleClose = () => {
     if (isUploading) return;
     resetState();
@@ -230,9 +230,9 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
           <div className="p-4 border rounded-lg bg-blue-50 border-blue-200 flex items-center justify-between">
             <div>
               <h4 className="font-semibold text-blue-800">CSV Template</h4>
-              <p className="text-sm text-blue-700">Download this template to ensure your data is correctly formatted for bulk upload.</p>
+              <p className="text-sm text-teal-700">Download this template to ensure your data is correctly formatted for bulk upload.</p>
             </div>
-            <Button variant="outline" onClick={downloadTemplate} className="bg-blue-100 text-blue-700 hover:bg-blue-200">
+            <Button variant="outline" onClick={downloadTemplate} className="bg-teal-100 text-teal-700 hover:bg-blue-200">
               <Download className="w-4 h-4 mr-2" />
               Download Template
             </Button>
@@ -244,7 +244,7 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
             <div
               className={`mt-2 flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-colors
                 ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}
-                ${isDraggingOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}
+                ${isDraggingOver ? 'border-teal-500 bg-teal-50' : 'border-gray-300 bg-gray-50 hover:bg-gray-100'}
               `}
               onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
               onDragEnter={(e) => { e.preventDefault(); e.stopPropagation(); if (!isUploading) setIsDraggingOver(true); }}
@@ -273,7 +273,7 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
               />
               {file ? (
                 <div className="flex items-center space-x-2">
-                  <FileText className="w-6 h-6 text-blue-500" />
+                  <FileText className="w-6 h-6 text-teal-500" />
                   <span className="text-sm text-slate-700 font-medium">{file.name}</span>
                   <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setFile(null); }} disabled={isUploading}>
                     <XCircle className="w-4 h-4 text-red-500" />
@@ -296,7 +296,7 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
               <p>Total rows to process: {uploadStatus.total}</p>
               <div className="w-full bg-gray-200 rounded-full h-2.5 mb-2">
                 <div
-                  className="bg-blue-600 h-2.5 rounded-full"
+                  className="bg-teal-600 h-2.5 rounded-full"
                   style={{ width: `${((uploadStatus.success + uploadStatus.failed) / uploadStatus.total) * 100 || 0}%` }}
                 ></div>
               </div>

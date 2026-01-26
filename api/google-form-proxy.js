@@ -1,37 +1,53 @@
 import axios from 'axios';
 
 export default async (req, res) => {
-  // Set CORS headers to allow requests from your frontend
-  res.setHeader('Access-Control-Allow-Origin', '*'); // Or be more specific: 'http://localhost:5173'
+  // Set CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Handle the preflight OPTIONS request
+  // Handle preflight
   if (req.method === 'OPTIONS') {
-    return res.status(200).end();
+    res.statusCode = 200;
+    res.end();
+    return;
   }
 
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    res.statusCode = 405;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ error: 'Method Not Allowed' }));
+    return;
   }
 
   try {
-    const googleScriptUrl = process.env.APPS_SCRIPT_URL;
-    if (!googleScriptUrl) {
-      throw new Error("APPS_SCRIPT_URL environment variable is not set.");
-    }
+    const googleScriptUrl = 'https://script.google.com/a/macros/gramtarang.org.in/s/AKfycbx6KmjnR5lBas-Dr6F7aC4YhUEuVH8jgPLhO6GUr8PRDd_xXmis71kHjMUR3iZz0bsj/exec';
 
-    console.log("Request Body:", req.body);
+    console.log("Proxying to Google Script:", googleScriptUrl);
 
     try {
       const response = await axios.post(googleScriptUrl, req.body);
-      res.status(200).json(response.data);
+
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify(response.data));
     } catch (error) {
       console.error("Error calling Google Apps Script:", error.response ? error.response.data : error.message);
-      res.status(500).json({ error: 'An internal server error occurred.' });
+
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({
+        error: 'An internal server error occurred.',
+        details: error.message
+      }));
     }
   } catch (error) {
-    console.error("Error:", error.message);
-    res.status(500).json({ error: 'An internal server error occurred.' });
+    console.error("Proxy Error:", error.message);
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
+      error: 'An internal server error occurred.',
+      details: error.message
+    }));
   }
 };

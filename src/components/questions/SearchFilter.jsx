@@ -2,6 +2,13 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Search, Filter, X, RefreshCw } from "lucide-react";
 import { Program, Course, Subject } from "@/entities/all";
 import { useToast } from "@/components/ui/use-toast";
@@ -30,7 +37,7 @@ export default function SearchFilter({ onFiltersChange, activeFilters = {} }) {
 
   // Load courses when selected program changes
   useEffect(() => {
-    if (selectedProgram) {
+    if (selectedProgram && selectedProgram !== "all") {
       loadCourses(selectedProgram);
     } else {
       setCourses([]);
@@ -42,7 +49,7 @@ export default function SearchFilter({ onFiltersChange, activeFilters = {} }) {
 
   // Load subjects when selected course changes
   useEffect(() => {
-    if (selectedCourse) {
+    if (selectedCourse && selectedCourse !== "all") {
       loadSubjects(selectedCourse);
     } else {
       setSubjects([]);
@@ -53,11 +60,11 @@ export default function SearchFilter({ onFiltersChange, activeFilters = {} }) {
   const handleFiltersChange = useCallback(() => {
     const filters = {
       search: searchText || "",
-      program: selectedProgram || "",
-      course: selectedCourse || "",
-      subject: selectedSubject || "",
-      level: selectedLevel || "",
-      year: selectedYear || "",
+      program: selectedProgram === "all" ? "" : selectedProgram,
+      course: selectedCourse === "all" ? "" : selectedCourse,
+      subject: selectedSubject === "all" ? "" : selectedSubject,
+      level: selectedLevel === "all" ? "" : selectedLevel,
+      year: selectedYear === "all" ? "" : selectedYear,
     };
     console.log("Applying filters:", filters);
     onFiltersChange(filters);
@@ -134,205 +141,181 @@ export default function SearchFilter({ onFiltersChange, activeFilters = {} }) {
 
   const getActiveFilterCount = () => {
     return [searchText, selectedProgram, selectedCourse, selectedSubject, selectedLevel, selectedYear].filter(
-      (value) => value && value !== ""
+      (value) => value && value !== "" && value !== "all"
     ).length;
   };
 
   return (
-    <div className="mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Filter className="w-5 h-5 text-blue-600" />
-        <h3 className="font-semibold text-slate-900">Search & Filter</h3>
-        {getActiveFilterCount() > 0 && (
-          <Badge variant="secondary" className="ml-2">
-            {getActiveFilterCount()} active
-          </Badge>
-        )}
-      </div>
+    <div className="w-full space-y-4 mb-6">
+      <div className="bg-card rounded-xl border shadow-sm p-5 space-y-5">
+        {/* Top Row: Search & Meta Controls */}
+        <div className="flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
+          <div className="relative w-full md:max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              placeholder="Search questions by text..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="pl-10 h-10 w-full"
+            />
+          </div>
 
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-        <Input
-          placeholder="Search questions..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-          className="pl-10 h-11 w-full"
-        />
-      </div>
-
-      {/* Filter Dropdowns */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200/60 p-6 mt-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-4">
-          <select
-            value={selectedProgram}
-            onChange={(e) => {
-              console.log("Program changed to:", e.target.value);
-              setSelectedProgram(e.target.value);
-            }}
-            className="h-10 border border-slate-300 rounded-md px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select Program</option>
-            {programs.map((program) => (
-              <option key={program.id} value={program.id}>
-                {program.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedCourse}
-            onChange={(e) => {
-              console.log("Course changed to:", e.target.value);
-              setSelectedCourse(e.target.value);
-            }}
-            disabled={!selectedProgram}
-            className="h-10 border border-slate-300 rounded-md px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            <option value="">Select Course</option>
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedSubject}
-            onChange={(e) => {
-              console.log("Subject changed to:", e.target.value);
-              setSelectedSubject(e.target.value);
-            }}
-            disabled={!selectedCourse}
-            className="h-10 border border-slate-300 rounded-md px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
-          >
-            <option value="">Select Subject</option>
-            {subjects.map((subject) => (
-              <option key={subject.id} value={subject.id}>
-                {subject.name}
-              </option>
-            ))}
-          </select>
-
-          <select
-            value={selectedLevel}
-            onChange={(e) => {
-              console.log("Level changed to:", e.target.value);
-              setSelectedLevel(e.target.value);
-            }}
-            className="h-10 border border-slate-300 rounded-md px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select Level</option>
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-          </select>
-
-          <select
-            value={selectedYear}
-            onChange={(e) => {
-              console.log("Year changed to:", e.target.value);
-              setSelectedYear(e.target.value);
-            }}
-            className="h-10 border border-slate-300 rounded-md px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            <option value="">Select Year</option>
-            {Array.from({ length: 3 }, (_, i) => 1 + i).map((year) => (
-              <option key={year} value={year.toString()}>
-                {year}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Active Filters */}
-        {getActiveFilterCount() > 0 && (
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-sm text-slate-600 font-medium">Active filters:</span>
-            {searchText && (
-              <Badge variant="outline" className="gap-1">
-                Search: {searchText}
-                <X
-                  className="w-3 h-3 cursor-pointer"
-                  onClick={() => {
-                    console.log("Removing search filter");
-                    removeFilter("search");
-                  }}
-                />
-              </Badge>
-            )}
-            {selectedProgram && (
-              <Badge variant="outline" className="gap-1">
-                Program: {programs.find((p) => p.id === selectedProgram)?.name || "Unknown"}
-                <X
-                  className="w-3 h-3 cursor-pointer"
-                  onClick={() => {
-                    console.log("Removing program filter");
-                    removeFilter("program");
-                  }}
-                />
-              </Badge>
-            )}
-            {selectedCourse && (
-              <Badge variant="outline" className="gap-1">
-                Course: {courses.find((c) => c.id === selectedCourse)?.name || "Unknown"}
-                <X
-                  className="w-3 h-3 cursor-pointer"
-                  onClick={() => {
-                    console.log("Removing course filter");
-                    removeFilter("course");
-                  }}
-                />
-              </Badge>
-            )}
-            {selectedSubject && (
-              <Badge variant="outline" className="gap-1">
-                Subject: {subjects.find((s) => s.id === selectedSubject)?.name || "Unknown"}
-                <X
-                  className="w-3 h-3 cursor-pointer"
-                  onClick={() => {
-                    console.log("Removing subject filter");
-                    removeFilter("subject");
-                  }}
-                />
-              </Badge>
-            )}
-            {selectedLevel && (
-              <Badge variant="outline" className="gap-1">
-                {selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)}
-                <X
-                  className="w-3 h-3 cursor-pointer"
-                  onClick={() => {
-                    console.log("Removing level filter");
-                    removeFilter("level");
-                  }}
-                />
-              </Badge>
-            )}
-            {selectedYear && (
-              <Badge variant="outline" className="gap-1">
-                Year: {selectedYear}
-                <X
-                  className="w-3 h-3 cursor-pointer"
-                  onClick={() => {
-                    console.log("Removing year filter");
-                    removeFilter("year");
-                  }}
-                />
+          <div className="flex items-center gap-2">
+            {getActiveFilterCount() > 0 && (
+              <Badge variant="secondary" className="hidden md:flex">
+                {getActiveFilterCount()} active filters
               </Badge>
             )}
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
-              onClick={() => {
-                console.log("Clearing all filters");
-                clearFilters();
-              }}
-              className="ml-2"
+              onClick={clearFilters}
+              disabled={getActiveFilterCount() === 0}
+              className="h-10 px-4"
             >
-              <RefreshCw className="w-4 h-4 mr-1" />
-              Clear All
+              <RefreshCw className={`w-4 h-4 mr-2 ${getActiveFilterCount() > 0 ? '' : 'opacity-50'}`} />
+              Reset
             </Button>
+          </div>
+        </div>
+
+        {/* Middle Row: Filter Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+          <Select value={selectedProgram} onValueChange={setSelectedProgram}>
+            <SelectTrigger className="bg-white border-slate-200 focus:ring-indigo-100">
+              <SelectValue placeholder="All Programs" />
+            </SelectTrigger>
+            <SelectContent className="bg-white shadow-xl border-slate-200">
+              <SelectItem value="all">All Programs</SelectItem>
+              {programs.map((program) => (
+                <SelectItem key={program.id} value={program.id}>
+                  {program.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={selectedCourse}
+            onValueChange={setSelectedCourse}
+            disabled={!selectedProgram || selectedProgram === "all"}
+          >
+            <SelectTrigger className="bg-white border-slate-200 focus:ring-indigo-100">
+              <SelectValue placeholder="All Courses" />
+            </SelectTrigger>
+            <SelectContent className="bg-white shadow-xl border-slate-200">
+              <SelectItem value="all">All Courses</SelectItem>
+              {courses.map((course) => (
+                <SelectItem key={course.id} value={course.id}>
+                  {course.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={selectedSubject}
+            onValueChange={setSelectedSubject}
+            disabled={!selectedCourse || selectedCourse === "all"}
+          >
+            <SelectTrigger className="bg-white border-slate-200 focus:ring-indigo-100">
+              <SelectValue placeholder="All Subjects" />
+            </SelectTrigger>
+            <SelectContent className="bg-white shadow-xl border-slate-200">
+              <SelectItem value="all">All Subjects</SelectItem>
+              {subjects.map((subject) => (
+                <SelectItem key={subject.id} value={subject.id}>
+                  {subject.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+            <SelectTrigger className="bg-white border-slate-200 focus:ring-indigo-100">
+              <SelectValue placeholder="All Levels" />
+            </SelectTrigger>
+            <SelectContent className="bg-white shadow-xl border-slate-200">
+              <SelectItem value="all">All Levels</SelectItem>
+              <SelectItem value="easy">Easy</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="hard">Hard</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={selectedYear} onValueChange={setSelectedYear}>
+            <SelectTrigger className="bg-white border-slate-200 focus:ring-indigo-100">
+              <SelectValue placeholder="All Years" />
+            </SelectTrigger>
+            <SelectContent className="bg-white shadow-xl border-slate-200">
+              <SelectItem value="all">All Years</SelectItem>
+              {Array.from({ length: 3 }, (_, i) => 1 + i).map((year) => (
+                <SelectItem key={year} value={year.toString()}>
+                  Year {year}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Bottom Row: Active Filter Tags (Mobile/Desktop) */}
+        {getActiveFilterCount() > 0 && (
+          <div className="flex flex-wrap gap-2 items-center pt-2 border-t border-slate-100">
+            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold mr-2">Active:</span>
+
+            {searchText && (
+              <Badge variant="secondary" className="gap-1 pl-2 pr-1 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200">
+                Search: "{searchText}"
+                <Button variant="ghost" size="icon" className="h-4 w-4 ml-1 hover:bg-blue-200 rounded-full" onClick={() => removeFilter("search")}>
+                  <X className="w-3 h-3" />
+                </Button>
+              </Badge>
+            )}
+
+            {selectedProgram && selectedProgram !== "all" && (
+              <Badge variant="secondary" className="gap-1 pl-2 pr-1 py-1">
+                {programs.find((p) => p.id === selectedProgram)?.name || "Program"}
+                <Button variant="ghost" size="icon" className="h-4 w-4 ml-1 hover:bg-secondary-foreground/10 rounded-full" onClick={() => removeFilter("program")}>
+                  <X className="w-3 h-3" />
+                </Button>
+              </Badge>
+            )}
+
+            {selectedCourse && selectedCourse !== "all" && (
+              <Badge variant="secondary" className="gap-1 pl-2 pr-1 py-1">
+                {courses.find((c) => c.id === selectedCourse)?.name || "Course"}
+                <Button variant="ghost" size="icon" className="h-4 w-4 ml-1 hover:bg-secondary-foreground/10 rounded-full" onClick={() => removeFilter("course")}>
+                  <X className="w-3 h-3" />
+                </Button>
+              </Badge>
+            )}
+
+            {selectedSubject && selectedSubject !== "all" && (
+              <Badge variant="secondary" className="gap-1 pl-2 pr-1 py-1">
+                {subjects.find((s) => s.id === selectedSubject)?.name || "Subject"}
+                <Button variant="ghost" size="icon" className="h-4 w-4 ml-1 hover:bg-secondary-foreground/10 rounded-full" onClick={() => removeFilter("subject")}>
+                  <X className="w-3 h-3" />
+                </Button>
+              </Badge>
+            )}
+
+            {selectedLevel && selectedLevel !== "all" && (
+              <Badge variant="secondary" className="gap-1 pl-2 pr-1 py-1">
+                {selectedLevel.charAt(0).toUpperCase() + selectedLevel.slice(1)}
+                <Button variant="ghost" size="icon" className="h-4 w-4 ml-1 hover:bg-secondary-foreground/10 rounded-full" onClick={() => removeFilter("level")}>
+                  <X className="w-3 h-3" />
+                </Button>
+              </Badge>
+            )}
+
+            {selectedYear && selectedYear !== "all" && (
+              <Badge variant="secondary" className="gap-1 pl-2 pr-1 py-1">
+                Year {selectedYear}
+                <Button variant="ghost" size="icon" className="h-4 w-4 ml-1 hover:bg-secondary-foreground/10 rounded-full" onClick={() => removeFilter("year")}>
+                  <X className="w-3 h-3" />
+                </Button>
+              </Badge>
+            )}
           </div>
         )}
       </div>

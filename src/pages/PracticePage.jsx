@@ -46,7 +46,7 @@ export default function PracticePage() {
       name: "Quick Practice",
       description: "10 mixed questions, 15 minutes",
       icon: Zap,
-      color: "from-blue-500 to-blue-600",
+      color: "from-teal-500 to-teal-600",
       questions: 10,
       time: 15,
       difficulty: "mixed",
@@ -126,7 +126,7 @@ export default function PracticePage() {
     try {
       const subjectsData = await Subject.list();
       setSubjects(subjectsData);
-     
+
       // Mock practice stats - in real app this would come from user's practice history
       setPracticeStats({
         totalSessions: 47,
@@ -154,7 +154,7 @@ export default function PracticePage() {
       alert("Please enter a session name");
       return;
     }
-   
+
     console.log("Creating custom session:", sessionConfig);
     alert(`Custom session "${sessionConfig.name}" created! This would start the practice session.`);
     setShowCustomSession(false);
@@ -190,7 +190,7 @@ export default function PracticePage() {
     return (
       <div className="p-6 max-w-7xl mx-auto">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4">Loading practice sessions...</p>
         </div>
       </div>
@@ -206,8 +206,8 @@ export default function PracticePage() {
           <h1 className="text-3xl font-bold text-slate-900">Practice Sessions</h1>
           <p className="text-slate-600 mt-2">Improve your skills with targeted practice</p>
         </div>
-       
-        <Button onClick={() => setShowCustomSession(true)} className="bg-indigo-600 hover:bg-indigo-700">
+
+        <Button onClick={() => setShowCustomSession(true)} className="bg-teal-600 hover:bg-teal-700">
           <Settings className="w-4 h-4 mr-2" />
           Custom Session
         </Button>
@@ -216,50 +216,58 @@ export default function PracticePage() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none">
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100">Total Sessions</p>
-                <p className="text-2xl font-bold">{practiceStats.totalSessions}</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-violet-50 rounded-xl">
+                <Target className="w-6 h-6 text-violet-600" />
               </div>
-              <Target className="w-8 h-8 text-blue-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Total Sessions</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{practiceStats.totalSessions}</p>
             </div>
           </CardContent>
         </Card>
-       
-        <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-none">
+
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100">Average Score</p>
-                <p className="text-2xl font-bold">{practiceStats.averageScore}%</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-emerald-50 rounded-xl">
+                <TrendingUp className="w-6 h-6 text-emerald-600" />
               </div>
-              <TrendingUp className="w-8 h-8 text-green-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Average Score</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{practiceStats.averageScore}%</p>
             </div>
           </CardContent>
         </Card>
-       
-        <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-none">
+
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-100">Time Spent</p>
-                <p className="text-2xl font-bold">{Math.round(practiceStats.timeSpent / 60)}h</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-amber-50 rounded-xl">
+                <Timer className="w-6 h-6 text-amber-600" />
               </div>
-              <Timer className="w-8 h-8 text-purple-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Time Spent</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{Math.round(practiceStats.timeSpent / 60)}h</p>
             </div>
           </CardContent>
         </Card>
-       
-        <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-none">
+
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-orange-100">Questions Done</p>
-                <p className="text-2xl font-bold">{practiceStats.questionsAttempted}</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-rose-50 rounded-xl">
+                <BookOpen className="w-6 h-6 text-rose-600" />
               </div>
-              <BookOpen className="w-8 h-8 text-orange-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Questions Done</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{practiceStats.questionsAttempted}</p>
             </div>
           </CardContent>
         </Card>
@@ -289,7 +297,7 @@ export default function PracticePage() {
                       <CardTitle className="text-lg">{session.name}</CardTitle>
                       <p className="text-slate-600 text-sm">{session.description}</p>
                     </CardHeader>
-                   
+
                     <CardContent>
                       <div className="space-y-2 mb-4 text-sm text-slate-600">
                         <div className="flex items-center justify-between">
@@ -305,7 +313,7 @@ export default function PracticePage() {
                           <span className="font-medium capitalize">{session.difficulty}</span>
                         </div>
                       </div>
-                     
+
                       <Button
                         onClick={() => handleStartSession(session.id)}
                         className="w-full bg-slate-900 hover:bg-slate-800"
@@ -344,8 +352,8 @@ export default function PracticePage() {
                   </div>
                   <Badge variant="secondary" className={
                     session.score >= 85 ? "bg-green-100 text-green-800" :
-                    session.score >= 70 ? "bg-yellow-100 text-yellow-800" :
-                    "bg-red-100 text-red-800"
+                      session.score >= 70 ? "bg-yellow-100 text-yellow-800" :
+                        "bg-red-100 text-red-800"
                   }>
                     {session.score}%
                   </Badge>
@@ -391,7 +399,7 @@ export default function PracticePage() {
           <DialogHeader>
             <DialogTitle>Create Custom Practice Session</DialogTitle>
           </DialogHeader>
-         
+
           <div className="space-y-6">
             <div>
               <Label htmlFor="sessionName">Session Name</Label>
@@ -520,7 +528,7 @@ export default function PracticePage() {
             <Button variant="outline" onClick={() => setShowCustomSession(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreateCustomSession} className="bg-blue-600 hover:bg-blue-700">
+            <Button onClick={handleCreateCustomSession} className="bg-teal-600 hover:bg-teal-700">
               Start Practice Session
             </Button>
           </DialogFooter>

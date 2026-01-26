@@ -1,12 +1,15 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus, Download, Upload, Trash2, FileText, Trophy } from "lucide-react";
-import { Question, Option, Subject, Course, Program } from "@/entities/all";
+import { Card, CardContent } from "@/components/ui/card";
+import { Question, Option } from "@/entities/all";
 import { useToast } from "@/components/ui/use-toast";
-
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import SearchFilter from "../components/questions/SearchFilter";
 import QuestionTable from "../components/questions/QuestionTable";
+import MobileQuestionCard from "../components/questions/MobileQuestionCard";
 import AddEditQuestionModal from "../components/questions/AddEditQuestionModal";
 import CreateQuizModal from "../components/questions/CreateQuizModal";
 import BulkUploadModal from "../components/questions/BulkUploadModal";
@@ -14,12 +17,10 @@ import BulkUploadModal from "../components/questions/BulkUploadModal";
 
 export default function QuestionsPage() {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const questionEntity = new Question();
   const optionEntity = new Option();
-  const subjectEntity = new Subject();
-  const courseEntity = new Course();
-  const programEntity = new Program();
 
   const [questions, setQuestions] = useState([]);
   const [filteredQuestions, setFilteredQuestions] = useState([]);
@@ -32,13 +33,12 @@ export default function QuestionsPage() {
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [filters, setFilters] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
-  const [questionsPerPage] = useState(10); // You can adjust this value
+  const [questionsPerPage] = useState(10);
   const [totalQuestions, setTotalQuestions] = useState(0);
 
 
   const applyFilters = useCallback(() => {
     let filtered = [...questions];
-
 
     if (filters.search) {
       filtered = filtered.filter(q =>
@@ -66,7 +66,6 @@ export default function QuestionsPage() {
       filtered = filtered.filter(q => q.subject?.year?.toString() === filters.year);
     }
 
-
     setFilteredQuestions(filtered);
     setTotalQuestions(filtered.length);
 
@@ -79,7 +78,6 @@ export default function QuestionsPage() {
 
   useEffect(() => {
     loadQuestions();
-    // Explicitly close all modals on mount to prevent continuous visibility issues
     setShowAddModal(false);
     setShowCreateQuizModal(false);
     setShowBulkUploadModal(false);
@@ -95,70 +93,11 @@ export default function QuestionsPage() {
   const loadQuestions = async () => {
     setIsLoading(true);
     try {
-      const questionsData = await questionEntity.list("created_at", false);
-     
-      // Load related data for each question with proper error handling
-      const questionsWithDetails = await Promise.all(
-        questionsData.map(async (question) => {
-          try {
-            // Load options for this question
-            const options = await optionEntity.filter({ question_id: question.id });
-            console.log(`Options for question ${question.id}:`, options);
-           
-            // Load subject with error handling
-            let subject = null;
-            let course = null;
-            let program = null;
-           
-            if (question.subject_id) {
-              try {
-                subject = await subjectEntity.get(question.subject_id);
-               
-                // Load course if subject exists
-                if (subject && subject.course_id) {
-                  try {
-                    course = await courseEntity.get(subject.course_id);
-                   
-                    // Load program if course exists
-                    if (course && course.program_id) {
-                      try {
-                        program = await programEntity.get(course.program_id);
-                      } catch (error) {
-                        console.warn(`Program not found for course ${course.id}:`, error);
-                      }
-                    }
-                  } catch (error) {
-                    console.warn(`Course not found for subject ${subject.id}:`, error);
-                  }
-                }
-              } catch (error) {
-                console.warn(`Subject not found for question ${question.id}:`, error);
-              }
-            }
-           
-            return {
-              ...question,
-              options: options || [],
-              subject,
-              course,
-              program
-            };
-          } catch (error) {
-            console.error(`Error loading details for question ${question.id}:`, error);
-            console.log("Question options for debugging:", question.options);
-            console.log("Is correct option found:", question.options?.find(opt => opt.is_correct));
-            return {
-              ...question,
-              options: [],
-              subject: null,
-              course: null,
-              program: null
-            };
-          }
-        })
-      );
-     
-      setQuestions(questionsWithDetails);
+      // Optimized fetching: Single query with all relations
+      // Eliminates the N+1 problem from the previous implementation
+      const questionsWithDetails = await questionEntity.listWithDetails("created_at", false);
+      setQuestions(questionsWithDetails || []);
+
     } catch (error) {
       console.error("Error loading questions:", error);
       toast({ variant: "destructive", description: "Failed to load questions." });
@@ -176,8 +115,8 @@ export default function QuestionsPage() {
     if (!confirmDelete) return;
 
     try {
-      // Delete options first, then questions
       for (const questionId of idsToDelete) {
+        // Cascade delete options first
         const options = await optionEntity.filter({ question_id: questionId });
         for (const option of options) {
           await optionEntity.delete(option.id);
@@ -187,23 +126,26 @@ export default function QuestionsPage() {
 
       setSelectedQuestions([]);
       loadQuestions();
+      toast({ description: "Questions deleted successfully." });
     } catch (error) {
       console.error("Error deleting questions:", error);
       toast({ variant: "destructive", description: "Error deleting questions. Please try again." });
     }
   };
 
+  const handleSelectQuestion = (questionId, checked) => {
+    if (checked) {
+      setSelectedQuestions(prev => [...prev, questionId]);
+    } else {
+      setSelectedQuestions(prev => prev.filter(id => id !== questionId));
+    }
+  };
 
   const handleCreateQuiz = () => {
     if (selectedQuestions.length === 0) {
       toast({ variant: "destructive", description: "Please select some questions first" });
       return;
     }
-   
-    const selectedQuestionObjects = filteredQuestions.filter(q =>
-      selectedQuestions.includes(q.id)
-    );
-   
     setShowCreateQuizModal(true);
   };
 
@@ -219,7 +161,6 @@ export default function QuestionsPage() {
       toast({ variant: "destructive", description: "No questions to export" });
       return;
     }
-
 
     const csvData = filteredQuestions.map(q => ({
       'program_name': q.program?.name || '',
@@ -237,13 +178,11 @@ export default function QuestionsPage() {
       'correct_option_label': q.options?.find(opt => opt.is_correct)?.option_label || '',
     }));
 
-
     const headers = Object.keys(csvData[0]);
     const csvContent = [
       headers.join(','),
       ...csvData.map(row => headers.map(header => `"${(row[header] || '').toString().replace(/"/g, '""')}"`).join(','))
     ].join('\n');
-
 
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -262,93 +201,115 @@ export default function QuestionsPage() {
 
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6 pb-20 md:pb-6">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Question Bank</h1>
-          <p className="text-slate-600 mt-2">Manage your educational questions and answers</p>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Question Bank</h1>
+          <p className="text-slate-600 mt-1 md:mt-2 text-sm md:text-base">Manage your educational questions and answers</p>
         </div>
-       
-        <div className="flex flex-wrap gap-3">
-          <Button variant="outline" onClick={handleExportCSV} disabled={filteredQuestions.length === 0} className="text-sm px-6 rounded-lg justify-center hover:bg-emerald-500 hover:text-white hover:scale-105 transition-transform">
-            <Download className="w-4 h-4 mr-2" />
-            Export CSV
-          </Button>
-          <Button variant="outline" onClick={() => setShowBulkUploadModal(true)} className="text-sm px-6 rounded-lg justify-center hover:bg-emerald-500 hover:text-white hover:scale-105 transition-transform">
-            <Upload className="w-4 h-4 mr-2" />
-            Bulk Upload
-          </Button>
-          {selectedQuestions.length > 0 && (
-            <>
-                            <Button 
-                              onClick={handleCreateQuiz} 
-                              variant="default"
-                              className="text-sm px-6 rounded-lg justify-center hover:bg-emerald-500 hover:text-white hover:scale-105 transition-transform"
-                            >
-                              <Trophy className="w-4 h-4 mr-2" />
-                              Create Quiz ({selectedQuestions.length})
-                            </Button>              <Button variant="destructive" onClick={() => handleDeleteSelected()} className="text-sm px-6 rounded-lg justify-center hover:bg-emerald-500 hover:text-white hover:scale-105 transition-transform">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Selected ({selectedQuestions.length})
-              </Button>
-            </>
-          )}
-          <Button onClick={() => setShowAddModal(true)} variant="default" className="text-sm px-6 rounded-lg justify-center hover:bg-emerald-500 hover:text-white hover:scale-105 transition-transform">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Question
-          </Button>
+
+        <div className="flex flex-wrap gap-2 md:gap-3 w-full lg:w-auto">
+          {/* Mobile Actions Group */}
+          <div className="grid grid-cols-2 gap-2 w-full md:flex md:w-auto">
+            <Button variant="outline" onClick={handleExportCSV} disabled={filteredQuestions.length === 0} className="w-full md:w-auto text-sm justify-center hover:bg-emerald-500 hover:text-white transition-all">
+              <Download className="w-4 h-4 mr-2" />
+              Export
+            </Button>
+            <Button variant="outline" onClick={() => setShowBulkUploadModal(true)} className="w-full md:w-auto text-sm justify-center hover:bg-emerald-500 hover:text-white transition-all">
+              <Upload className="w-4 h-4 mr-2" />
+              Upload
+            </Button>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 w-full md:w-auto">
+            {selectedQuestions.length > 0 && (
+              <>
+                <Button
+                  onClick={handleCreateQuiz}
+                  variant="default"
+                  className="flex-1 md:flex-none text-sm justify-center hover:bg-emerald-500 hover:text-white animate-in zoom-in duration-200"
+                >
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Quiz ({selectedQuestions.length})
+                </Button>
+                <Button variant="destructive" onClick={() => handleDeleteSelected()} className="flex-1 md:flex-none text-sm justify-center hover:bg-red-600 transition-all">
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete ({selectedQuestions.length})
+                </Button>
+              </>
+            )}
+            <Button onClick={() => setShowAddModal(true)} variant="default" className="flex-1 md:flex-none text-sm justify-center hover:bg-emerald-500 hover:text-white transition-all">
+              <Plus className="w-4 h-4 mr-2" />
+              Add
+            </Button>
+          </div>
         </div>
       </div>
 
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
+      {/* Stats Cards - Grid optimized for mobile (2 cols) vs Desktop (4 cols) */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+        {/* Total */}
+        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <div className="p-2 md:p-4 bg-violet-50 rounded-xl">
+                <FileText className="w-4 h-4 md:w-6 md:h-6 text-violet-600" />
+              </div>
+            </div>
             <div>
-              <p className="text-blue-100">Total Questions</p>
-              <p className="text-2xl font-bold">{questions.length}</p>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Total</p>
+              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{questions.length}</p>
             </div>
-            <FileText className="w-8 h-8 text-blue-200" />
-          </div>
-        </div>
-       
-        <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
+          </CardContent>
+        </Card>
+
+        {/* Easy */}
+        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <div className="p-2 md:p-4 bg-emerald-50 rounded-xl">
+                <span className="text-emerald-600 font-bold text-sm md:text-lg">E</span>
+              </div>
+            </div>
             <div>
-              <p className="text-green-100">Easy Questions</p>
-              <p className="text-2xl font-bold">{questions.filter(q => q.level === 'easy').length}</p>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Easy</p>
+              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{questions.filter(q => q.level === 'easy').length}</p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-green-200 flex items-center justify-center">
-              <span className="text-green-600 font-bold text-sm">E</span>
+          </CardContent>
+        </Card>
+
+        {/* Medium */}
+        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <div className="p-2 md:p-4 bg-amber-50 rounded-xl">
+                <span className="text-amber-600 font-bold text-sm md:text-lg">M</span>
+              </div>
             </div>
-          </div>
-        </div>
-       
-        <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
             <div>
-              <p className="text-yellow-100">Medium Questions</p>
-              <p className="text-2xl font-bold">{questions.filter(q => q.level === 'medium').length}</p>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Medium</p>
+              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{questions.filter(q => q.level === 'medium').length}</p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-yellow-200 flex items-center justify-center">
-              <span className="text-yellow-600 font-bold text-sm">M</span>
+          </CardContent>
+        </Card>
+
+        {/* Hard */}
+        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <div className="p-2 md:p-4 bg-rose-50 rounded-xl">
+                <span className="text-rose-600 font-bold text-sm md:text-lg">H</span>
+              </div>
             </div>
-          </div>
-        </div>
-       
-        <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
             <div>
-              <p className="text-red-100">Hard Questions</p>
-              <p className="text-2xl font-bold">{questions.filter(q => q.level === 'hard').length}</p>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Hard</p>
+              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{questions.filter(q => q.level === 'hard').length}</p>
             </div>
-            <div className="w-8 h-8 rounded-full bg-red-200 flex items-center justify-center">
-              <span className="text-red-600 font-bold text-sm">H</span>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
 
 
@@ -356,40 +317,61 @@ export default function QuestionsPage() {
       <SearchFilter onFiltersChange={setFilters} activeFilters={filters} />
 
 
-      {/* Question Table */}
-      <QuestionTable
-        questions={paginatedQuestions}
-        selectedQuestions={selectedQuestions}
-        onSelectionChange={setSelectedQuestions}
-        onEditQuestion={setEditingQuestion}
-        onDeleteQuestions={handleDeleteSelected}
-        isLoading={isLoading}
-      />
+      {/* Data Display - Conditional Render based on Mobile/Desktop */}
+      <div className="mt-6">
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+              <Skeleton key={i} className="h-24 w-full rounded-xl" />
+            ))}
+          </div>
+        ) : isMobile ? (
+          <div className="space-y-3">
+            {paginatedQuestions.length === 0 ? (
+              <div className="text-center py-10 text-slate-500">No questions found.</div>
+            ) : (
+              paginatedQuestions.map(question => (
+                <MobileQuestionCard
+                  key={question.id}
+                  question={question}
+                  isSelected={selectedQuestions.includes(question.id)}
+                  onSelect={handleSelectQuestion}
+                  onEdit={setEditingQuestion}
+                  onDelete={handleDeleteSelected}
+                />
+              ))
+            )}
+          </div>
+        ) : (
+          <QuestionTable
+            questions={paginatedQuestions}
+            selectedQuestions={selectedQuestions}
+            onSelectionChange={setSelectedQuestions}
+            onEditQuestion={setEditingQuestion}
+            onDeleteQuestions={handleDeleteSelected}
+            isLoading={false}
+          />
+        )}
+      </div>
 
       {/* Pagination Controls */}
-      <div className="flex justify-between items-center mt-8">
-        <div className="text-sm text-slate-600">
+      <div className="flex flex-col md:flex-row justify-between items-center mt-8 gap-4">
+        <div className="text-xs md:text-sm text-slate-600">
           Showing {Math.min(totalQuestions, (currentPage - 1) * questionsPerPage + 1)}-{Math.min(totalQuestions, currentPage * questionsPerPage)} of {totalQuestions} questions
         </div>
         <div className="flex items-center space-x-2">
           <Button
             variant="outline"
+            size="sm"
             onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
             disabled={currentPage === 1}
           >
             Previous
           </Button>
-          {[...Array(Math.ceil(totalQuestions / questionsPerPage))].map((_, i) => (
-            <Button
-              key={i + 1}
-              variant={currentPage === i + 1 ? "default" : "outline"}
-              onClick={() => setCurrentPage(i + 1)}
-            >
-              {i + 1}
-            </Button>
-          ))}
+          <span className="text-sm font-medium px-2">Page {currentPage}</span>
           <Button
             variant="outline"
+            size="sm"
             onClick={() => setCurrentPage(prev => Math.min(Math.ceil(totalQuestions / questionsPerPage), prev + 1))}
             disabled={currentPage === Math.ceil(totalQuestions / questionsPerPage)}
           >

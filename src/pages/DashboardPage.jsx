@@ -68,7 +68,7 @@ import { useToast } from "@/components/ui/use-toast";
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
 
 
-export default function DashboardPage() {
+export default function DashboardPage({ roleName = "Trainer" }) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("overview");
@@ -89,7 +89,7 @@ export default function DashboardPage() {
     topPerformers: 0,
     lowPerformers: 0
   });
- 
+
   // Chart Data States
   const [testTrendsData, setTestTrendsData] = useState([]);
   const [sessionTrendsData, setSessionTrendsData] = useState([]);
@@ -248,7 +248,7 @@ export default function DashboardPage() {
           const exam = await Exam.get(attempt.exam_id);
           // We'll use exam type as a proxy for subjects since exams don't directly have subject_id
           const subjectKey = exam.exam_type || 'general';
-         
+
           if (!subjectStats[subjectKey]) {
             subjectStats[subjectKey] = {
               subject: subjectKey,
@@ -298,7 +298,7 @@ export default function DashboardPage() {
           const attendees = await OnlineSessionAttendee.filter({ session_id: session.id });
           const attendedCount = attendees.filter(a => a.has_joined).length;
           const attendanceRate = attendees.length > 0 ? (attendedCount / attendees.length) * 100 : 0;
-         
+
           return {
             name: session.title.substring(0, 15) + (session.title.length > 15 ? '...' : ''),
             attended: attendedCount,
@@ -327,7 +327,7 @@ export default function DashboardPage() {
           let diff = 'medium';
           if (attempt.percentage >= 70) diff = 'easy';
           else if (attempt.percentage < 50) diff = 'hard';
-         
+
           diffPerformance[diff].count++;
           diffPerformance[diff].total += (attempt.percentage || 0);
         } catch (err) {
@@ -375,7 +375,7 @@ export default function DashboardPage() {
       const instructorStats = {};
       for (const session of onlineSessions.filter(s => s.status === 'completed')) {
         const instructorEmail = session.instructor_email || 'unknown';
-       
+
         if (!instructorStats[instructorEmail]) {
           instructorStats[instructorEmail] = {
             instructor: session.instructor_name || instructorEmail,
@@ -384,9 +384,9 @@ export default function DashboardPage() {
             avgAttendance: 0
           };
         }
-       
+
         instructorStats[instructorEmail].sessions++;
-       
+
         const attendees = await OnlineSessionAttendee.filter({ session_id: session.id });
         const attended = attendees.filter(a => a.has_joined).length;
         instructorStats[instructorEmail].totalAttendees += attended;
@@ -450,7 +450,7 @@ export default function DashboardPage() {
     return (
       <div className="p-6 max-w-[1600px] mx-auto">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4 text-lg">Loading analytics dashboard...</p>
         </div>
       </div>
@@ -463,15 +463,14 @@ export default function DashboardPage() {
     if (value < 0) return <ArrowDown className="w-4 h-4 text-red-500" />;
     return <Minus className="w-4 h-4 text-slate-400" />;
   };
-
-
+  // ... (inside return)
   return (
     <div className="p-6 max-w-[1600px] mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">Analytics Dashboard</h1>
+        <h1 className="text-4xl font-bold text-slate-900 mb-2">{roleName} Dashboard</h1>
         <p className="text-slate-600 text-lg">
-          Comprehensive insights into assessments and learning sessions
+          Welcome back! Here's your performance overview.
         </p>
       </div>
 
@@ -481,7 +480,7 @@ export default function DashboardPage() {
         <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="assessments">Assessments</TabsTrigger>
-          <TabsTrigger value="sessions">Sessions</TabsTrigger>
+
         </TabsList>
 
 
@@ -489,153 +488,127 @@ export default function DashboardPage() {
         <TabsContent value="overview" className="space-y-6">
           {/* Primary KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white border-none shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-white/20 rounded-lg">
-                    <Users className="w-6 h-6" />
+                  <div className="p-4 bg-violet-50 rounded-xl">
+                    <Users className="w-6 h-6 text-violet-600" />
                   </div>
-                  <Badge className="bg-white/20 text-white border-none">
+                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100">
                     {getTrendIcon(5)} 5%
                   </Badge>
                 </div>
-                <p className="text-blue-100 text-sm mb-1">Total Students</p>
-                <p className="text-4xl font-bold">{stats.totalStudents}</p>
-                <p className="text-blue-100 text-xs mt-2">Active learners</p>
+                <div className="space-y-1">
+                  <p className="text-slate-500 text-sm font-medium">Total Students</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-3xl font-bold text-slate-900">{stats.totalStudents}</p>
+                    <p className="text-slate-400 text-xs">Active learners</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
 
-            <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white border-none shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-white/20 rounded-lg">
-                    <Trophy className="w-6 h-6" />
+                  <div className="p-4 bg-emerald-50 rounded-xl">
+                    <Trophy className="w-6 h-6 text-emerald-600" />
                   </div>
-                  <Badge className="bg-white/20 text-white border-none">
-                    {getTrendIcon(stats.avgTestScore > 70 ? 2 : -1)} 
+                  <Badge className={`bg-${stats.avgTestScore > 70 ? 'emerald' : 'rose'}-50 text-${stats.avgTestScore > 70 ? 'emerald' : 'rose'}-700 border-${stats.avgTestScore > 70 ? 'emerald' : 'rose'}-100`}>
+                    {getTrendIcon(stats.avgTestScore > 70 ? 2 : -1)}
                     {stats.avgTestScore > 70 ? '+2%' : '-1%'}
-                  </Badge>                </div>
-                <p className="text-green-100 text-sm mb-1">Avg Performance</p>
-                <p className="text-4xl font-bold">{stats.avgTestScore}%</p>
-                <p className="text-green-100 text-xs mt-2">Across all tests</p>
+                  </Badge>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-slate-500 text-sm font-medium">Avg Performance</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-3xl font-bold text-slate-900">{stats.avgTestScore}%</p>
+                    <p className="text-slate-400 text-xs">Across all tests</p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
 
 
-            <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white border-none shadow-lg hover:shadow-xl transition-shadow">
+            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-white/20 rounded-lg">
-                    <FileText className="w-6 h-6" />
+                  <div className="p-4 bg-amber-50 rounded-xl">
+                    <FileText className="w-6 h-6 text-amber-600" />
                   </div>
-                  <Badge className="bg-white/20 text-white border-none">
+                  <Badge className="bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100">
                     {getTrendIcon(3)} 3%
                   </Badge>
                 </div>
-                <p className="text-purple-100 text-sm mb-1">Total Assessments</p>
-                <p className="text-4xl font-bold">{stats.totalTests}</p>
-                <p className="text-purple-100 text-xs mt-2">{stats.activeTests} active</p>
-              </CardContent>
-            </Card>
-
-
-            <Card className="bg-gradient-to-br from-orange-500 to-orange-600 text-white border-none shadow-lg hover:shadow-xl transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-white/20 rounded-lg">
-                    <Video className="w-6 h-6" />
+                <div className="space-y-1">
+                  <p className="text-slate-500 text-sm font-medium">Total Assessments</p>
+                  <div className="flex items-baseline gap-2">
+                    <p className="text-3xl font-bold text-slate-900">{stats.totalTests}</p>
+                    <p className="text-slate-400 text-xs">{stats.activeTests} active</p>
                   </div>
-                  <Badge className="bg-white/20 text-white border-none">
-                    {getTrendIcon(stats.avgAttendanceRate > 70 ? 4 : 0)} 
-                    {stats.avgAttendanceRate > 70 ? '+4%' : '0%'}
-                  </Badge>                </div>
-                <p className="text-orange-100 text-sm mb-1">Session Attendance</p>
-                <p className="text-4xl font-bold">{stats.avgAttendanceRate}%</p>
-                <p className="text-orange-100 text-xs mt-2">Average rate</p>
+                </div>
               </CardContent>
             </Card>
+
+
           </div>
 
 
           {/* Secondary Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Users className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.totalClassrooms}</p>
-                    <p className="text-xs text-slate-600">Classrooms</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
 
 
-            <Card className="hover:shadow-md transition-shadow">
+
+            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <CheckCircle className="w-5 h-5 text-green-600" />
+                  <div className="p-2 bg-emerald-50 rounded-lg">
+                    <CheckCircle className="w-5 h-5 text-emerald-600" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-slate-900">{stats.completedTests}</p>
-                    <p className="text-xs text-slate-600">Completed</p>
+                    <p className="text-xs text-slate-500 font-medium">Completed</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
 
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <Target className="w-5 h-5 text-purple-600" />
+                  <div className="p-2 bg-violet-50 rounded-lg">
+                    <Target className="w-5 h-5 text-violet-600" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-slate-900">{stats.totalQuestions}</p>
-                    <p className="text-xs text-slate-600">Questions</p>
+                    <p className="text-xs text-slate-500 font-medium">Questions</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
 
-            <Card className="hover:shadow-md transition-shadow">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-orange-100 rounded-lg">
-                    <Video className="w-5 h-5 text-orange-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.totalSessions}</p>
-                    <p className="text-xs text-slate-600">Sessions</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
 
-            <Card className="hover:shadow-md transition-shadow">
+
+            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-yellow-100 rounded-lg">
-                    <Trophy className="w-5 h-5 text-yellow-600" />
+                  <div className="p-2 bg-amber-50 rounded-lg">
+                    <Trophy className="w-5 h-5 text-amber-600" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold text-slate-900">{stats.topPerformers}</p>
-                    <p className="text-xs text-slate-600">Top (80%+)</p>
+                    <p className="text-xs text-slate-500 font-medium">Top (80%+)</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
 
-            <Card className="hover:shadow-md transition-shadow">
+            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-red-100 rounded-lg">
@@ -655,7 +628,7 @@ export default function DashboardPage() {
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="w-5 h-5 text-blue-600" />
+                <BarChart3 className="w-5 h-5 text-teal-600" />
                 Weekly Activity Overview
               </CardTitle>
             </CardHeader>
@@ -736,49 +709,8 @@ export default function DashboardPage() {
 
 
           {/* Quick Actions */}
-          <Card className="shadow-lg bg-gradient-to-r from-slate-50 to-blue-50">
-            <CardHeader>
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 justify-items-center">
-              <Button variant="outline" className="justify-start h-auto py-4 hover:bg-white hover:shadow-md transition-all" asChild>
-                <Link to={createPageUrl("Classrooms")}>
-                  <Users className="w-5 h-5 mr-2" />
-                  <div className="text-left">
-                    <div className="font-semibold">Classrooms</div>
-                    <div className="text-xs text-slate-500">Manage classes</div>
-                  </div>
-                </Link>
-              </Button>
-              <Button variant="outline" className="justify-start h-auto py-4 hover:bg-white hover:shadow-md transition-all" asChild>
-                <Link to={createPageUrl("LiveTests")}>
-                  <FileText className="w-5 h-5 mr-2" />
-                  <div className="text-left">
-                    <div className="font-semibold">Live Tests</div>
-                    <div className="text-xs text-slate-500">View assessments</div>
-                  </div>
-                </Link>
-              </Button>
-              <Button variant="outline" className="justify-start h-auto py-4 hover:bg-white hover:shadow-md transition-all" asChild>
-                <Link to={createPageUrl("Questions")}>
-                  <BookOpen className="w-5 h-5 mr-2" />
-                  <div className="text-left">
-                    <div className="font-semibold">Question Bank</div>
-                    <div className="text-xs text-slate-500">Add questions</div>
-                  </div>
-                </Link>
-              </Button>
-              <Button variant="outline" className="justify-start h-auto py-4 hover:bg-white hover:shadow-md transition-all" asChild>
-                <Link to={createPageUrl("OnlineSessions")}>
-                  <Video className="w-5 h-5 mr-2" />
-                  <div className="text-left">
-                    <div className="font-semibold">Online Sessions</div>
-                    <div className="text-xs text-slate-500">Schedule classes</div>
-                  </div>
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
+
+
         </TabsContent>
 
 
@@ -786,38 +718,38 @@ export default function DashboardPage() {
         <TabsContent value="assessments" className="space-y-6">
           {/* Assessment Stats */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="bg-gradient-to-br from-blue-500 to-blue-600 text-white">
+            <Card className="bg-blue-50 border border-blue-100">
               <CardContent className="p-6">
-                <FileText className="w-8 h-8 mb-3 opacity-80" />
-                <p className="text-4xl font-bold mb-1">{stats.totalTests}</p>
-                <p className="text-blue-100">Total Tests</p>
+                <FileText className="w-8 h-8 mb-3 text-teal-600" />
+                <p className="text-4xl font-bold mb-1 text-blue-900">{stats.totalTests}</p>
+                <p className="text-teal-600">Total Tests</p>
               </CardContent>
             </Card>
 
 
-            <Card className="bg-gradient-to-br from-green-500 to-green-600 text-white">
+            <Card className="bg-green-50 border border-green-100">
               <CardContent className="p-6">
-                <CheckCircle className="w-8 h-8 mb-3 opacity-80" />
-                <p className="text-4xl font-bold mb-1">{stats.completedTests}</p>
-                <p className="text-green-100">Completed</p>
+                <CheckCircle className="w-8 h-8 mb-3 text-green-600" />
+                <p className="text-4xl font-bold mb-1 text-green-900">{stats.completedTests}</p>
+                <p className="text-green-600">Completed</p>
               </CardContent>
             </Card>
 
 
-            <Card className="bg-gradient-to-br from-purple-500 to-purple-600 text-white">
+            <Card className="bg-purple-50 border border-purple-100">
               <CardContent className="p-6">
-                <Target className="w-8 h-8 mb-3 opacity-80" />
-                <p className="text-4xl font-bold mb-1">{stats.avgTestScore}%</p>
-                <p className="text-purple-100">Avg Score</p>
+                <Target className="w-8 h-8 mb-3 text-purple-600" />
+                <p className="text-4xl font-bold mb-1 text-purple-900">{stats.avgTestScore}%</p>
+                <p className="text-purple-600">Avg Score</p>
               </CardContent>
             </Card>
 
 
-            <Card className="bg-gradient-to-br from-yellow-500 to-yellow-600 text-white">
+            <Card className="bg-yellow-50 border border-yellow-100">
               <CardContent className="p-6">
-                <Trophy className="w-8 h-8 mb-3 opacity-80" />
-                <p className="text-4xl font-bold mb-1">{stats.topPerformers}</p>
-                <p className="text-yellow-100">Top Performers</p>
+                <Trophy className="w-8 h-8 mb-3 text-yellow-600" />
+                <p className="text-4xl font-bold mb-1 text-yellow-900">{stats.topPerformers}</p>
+                <p className="text-yellow-600">Top Performers</p>
               </CardContent>
             </Card>
           </div>
@@ -827,7 +759,7 @@ export default function DashboardPage() {
           <Card className="shadow-lg">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-blue-600" />
+                <TrendingUp className="w-5 h-5 text-teal-600" />
                 Assessment Activity Trends (Last 6 Months)
               </CardTitle>
             </CardHeader>
@@ -836,16 +768,16 @@ export default function DashboardPage() {
                 <AreaChart data={testTrendsData}>
                   <defs>
                     <linearGradient id="colorCreated" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1}/>
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1} />
                     </linearGradient>
                     <linearGradient id="colorAttempted" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
+                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#10b981" stopOpacity={0.1} />
                     </linearGradient>
                     <linearGradient id="colorCompleted" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8}/>
-                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1}/>
+                      <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.8} />
+                      <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
@@ -938,152 +870,8 @@ export default function DashboardPage() {
         </TabsContent>
 
 
-        {/* SESSIONS TAB */}
-        <TabsContent value="sessions" className="space-y-6">
-          {/* Session Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="bg-gradient-to-br from-indigo-500 to-indigo-600 text-white">
-              <CardContent className="p-6">
-                <Video className="w-8 h-8 mb-3 opacity-80" />
-                <p className="text-4xl font-bold mb-1">{stats.totalSessions}</p>
-                <p className="text-indigo-100">Total Sessions</p>
-              </CardContent>
-            </Card>
 
-
-            <Card className="bg-gradient-to-br from-red-500 to-red-600 text-white">
-              <CardContent className="p-6">
-                <Play className="w-8 h-8 mb-3 opacity-80" />
-                <p className="text-4xl font-bold mb-1">{stats.liveSessions}</p>
-                <p className="text-red-100">Live Now</p>
-              </CardContent>
-            </Card>
-
-
-            <Card className="bg-gradient-to-br from-teal-500 to-teal-600 text-white">
-              <CardContent className="p-6">
-                <CheckCircle className="w-8 h-8 mb-3 opacity-80" />
-                <p className="text-4xl font-bold mb-1">{stats.completedSessions}</p>
-                <p className="text-teal-100">Completed</p>
-              </CardContent>
-            </Card>
-
-
-            <Card className="bg-gradient-to-br from-pink-500 to-pink-600 text-white">
-              <CardContent className="p-6">
-                <UserCheck className="w-8 h-8 mb-3 opacity-80" />
-                <p className="text-4xl font-bold mb-1">{stats.avgAttendanceRate}%</p>
-                <p className="text-pink-100">Avg Attendance</p>
-              </CardContent>
-            </Card>
-          </div>
-
-
-          {/* Session Trends */}
-          <Card className="shadow-lg">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-indigo-600" />
-                Online Session Trends (Last 6 Months)
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ResponsiveContainer width="100%" height={350}>
-                <LineChart data={sessionTrendsData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
-                  <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
-                  <Legend />
-                  <Line type="monotone" dataKey="scheduled" stroke="#3b82f6" strokeWidth={3} dot={{ r: 5 }} name="Scheduled" />
-                  <Line type="monotone" dataKey="completed" stroke="#10b981" strokeWidth={3} dot={{ r: 5 }} name="Completed" />
-                </LineChart>
-              </ResponsiveContainer>
-            </CardContent>
-          </Card>
-
-
-          {/* Session Status & Attendance */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Session Status */}
-            {sessionStatusData.length > 0 && (
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle>Session Status Overview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={sessionStatusData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {sessionStatusData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                      <Legend />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-
-
-            {/* Instructor Performance */}
-            {instructorPerformanceData.length > 0 && (
-              <Card className="shadow-lg">
-                <CardHeader>
-                  <CardTitle>Top Instructors by Engagement</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={instructorPerformanceData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                      <XAxis dataKey="instructor" angle={-45} textAnchor="end" height={100} />
-                      <YAxis />
-                      <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
-                      <Legend />
-                      <Bar dataKey="sessions" fill="#3b82f6" name="Sessions" radius={[8, 8, 0, 0]} />
-                      <Bar dataKey="avgAttendance" fill="#10b981" name="Avg Attendees" radius={[8, 8, 0, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-
-          {/* Attendance Comparison */}
-          {attendanceComparisonData.length > 0 && (
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle>Session Attendance Analysis (Recent 10 Sessions)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={350}>
-                  <BarChart data={attendanceComparisonData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                    <YAxis />
-                    <Tooltip contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }} />
-                    <Legend />
-                    <Bar dataKey="invited" fill="#94a3b8" name="Invited" radius={[8, 8, 0, 0]} />
-                    <Bar dataKey="attended" fill="#10b981" name="Attended" radius={[8, 8, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          )}
-        </TabsContent>
       </Tabs>
-    </div>
+    </div >
   );
 }

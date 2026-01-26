@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Gift, Search, Play, Users, Clock, Star, TrendingUp, Heart, Award } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 
 export default function FreeQuizzesPage() {
@@ -15,6 +16,7 @@ export default function FreeQuizzesPage() {
   const [difficultyFilter, setDifficultyFilter] = useState("all");
   const [sortBy, setSortBy] = useState("popular");
   const [isLoading, setIsLoading] = useState(true);
+  const isMobile = useIsMobile();
 
 
   const categories = [
@@ -235,7 +237,7 @@ export default function FreeQuizzesPage() {
     return (
       <div className="p-6 max-w-7xl mx-auto">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4">Loading free quizzes...</p>
         </div>
       </div>
@@ -244,62 +246,70 @@ export default function FreeQuizzesPage() {
 
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Free Quizzes</h1>
-        <p className="text-slate-600 mt-2">Explore our collection of free, community-created quizzes</p>
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900`}>Free Quizzes</h1>
+        <p className={`text-slate-600 mt-2 ${isMobile ? 'text-sm' : ''}`}>Explore our collection of free, community-created quizzes</p>
       </div>
 
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-gradient-to-r from-pink-500 to-pink-600 text-white border-none">
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-pink-100">Total Quizzes</p>
-                <p className="text-2xl font-bold">{quizzes.length}</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-rose-50 rounded-xl">
+                <Gift className="w-6 h-6 text-rose-600" />
               </div>
-              <Gift className="w-8 h-8 text-pink-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Total Quizzes</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{quizzes.length}</p>
             </div>
           </CardContent>
         </Card>
-       
-        <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none">
+
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100">Total Participants</p>
-                <p className="text-2xl font-bold">{(quizzes.reduce((sum, quiz) => sum + quiz.participants, 0) / 1000).toFixed(1)}K</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-violet-50 rounded-xl">
+                <Users className="w-6 h-6 text-violet-600" />
               </div>
-              <Users className="w-8 h-8 text-blue-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Total Participants</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{(quizzes.reduce((sum, quiz) => sum + quiz.participants, 0) / 1000).toFixed(1)}K</p>
             </div>
           </CardContent>
         </Card>
-       
-        <Card className="bg-gradient-to-r from-yellow-500 to-yellow-600 text-white border-none">
+
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-yellow-100">Avg Rating</p>
-                <p className="text-2xl font-bold">
-                  {quizzes.length > 0 ? (quizzes.reduce((sum, quiz) => sum + quiz.rating, 0) / quizzes.length).toFixed(1) : 'N/A'}
-                </p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-amber-50 rounded-xl">
+                <Star className="w-6 h-6 text-amber-600" />
               </div>
-              <Star className="w-8 h-8 text-yellow-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Avg Rating</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">
+                {quizzes.length > 0 ? (quizzes.reduce((sum, quiz) => sum + quiz.rating, 0) / quizzes.length).toFixed(1) : 'N/A'}
+              </p>
             </div>
           </CardContent>
         </Card>
-       
-        <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-none">
+
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
           <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100">Categories</p>
-                <p className="text-2xl font-bold">{categories.length}</p>
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-emerald-50 rounded-xl">
+                <Award className="w-6 h-6 text-emerald-600" />
               </div>
-              <Award className="w-8 h-8 text-green-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Categories</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{categories.length}</p>
             </div>
           </CardContent>
         </Card>
@@ -317,7 +327,7 @@ export default function FreeQuizzesPage() {
             className="pl-10"
           />
         </div>
-       
+
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger>
             <SelectValue placeholder="Category" />
@@ -329,7 +339,7 @@ export default function FreeQuizzesPage() {
             ))}
           </SelectContent>
         </Select>
-       
+
         <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
           <SelectTrigger>
             <SelectValue placeholder="Difficulty" />
@@ -341,7 +351,7 @@ export default function FreeQuizzesPage() {
             <SelectItem value="hard">Hard</SelectItem>
           </SelectContent>
         </Select>
-       
+
         <Select value={sortBy} onValueChange={setSortBy}>
           <SelectTrigger>
             <SelectValue placeholder="Sort by" />
@@ -360,7 +370,7 @@ export default function FreeQuizzesPage() {
       {filteredQuizzes.some(quiz => quiz.isFeatured) && (
         <div className="mb-8">
           <h2 className="text-xl font-semibold text-slate-900 mb-4">Featured Quizzes</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-3 gap-6'}`}>
             {filteredQuizzes.filter(quiz => quiz.isFeatured).slice(0, 3).map((quiz) => (
               <Card key={quiz.id} className="hover:shadow-lg transition-all duration-300 border-slate-200/60 overflow-hidden">
                 <div className="relative">
@@ -383,7 +393,7 @@ export default function FreeQuizzesPage() {
                       {quiz.difficulty}
                     </Badge>
                   </div>
-                 
+
                   <div className="space-y-2 text-sm text-slate-600 mb-4">
                     <div className="flex items-center justify-between">
                       <span>{quiz.questions} Questions</span>
@@ -400,8 +410,8 @@ export default function FreeQuizzesPage() {
                       </span>
                     </div>
                   </div>
-                 
-                  <Button className="w-full bg-indigo-600 hover:bg-indigo-700">
+
+                  <Button className="w-full bg-teal-600 hover:bg-teal-700">
                     <Play className="w-4 h-4 mr-2" />
                     Start Quiz
                   </Button>
@@ -435,7 +445,7 @@ export default function FreeQuizzesPage() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
             {filteredQuizzes.map((quiz) => (
               <Card key={quiz.id} className="hover:shadow-lg transition-shadow duration-300 border-slate-200/60">
                 {/* Add a thumbnail to each quiz card for visual appeal */}
@@ -470,7 +480,7 @@ export default function FreeQuizzesPage() {
                     </div>
                   </div>
                 </CardHeader>
-               
+
                 <CardContent>
                   <div className="flex items-center gap-2 mb-4">
                     <Badge variant="secondary" className={getDifficultyColor(quiz.difficulty)}>
@@ -478,7 +488,7 @@ export default function FreeQuizzesPage() {
                     </Badge>
                     <span className="text-xs text-slate-500">by {quiz.author}</span>
                   </div>
-                 
+
                   <div className="grid grid-cols-2 gap-4 text-sm text-slate-600 mb-4">
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
@@ -497,7 +507,7 @@ export default function FreeQuizzesPage() {
                       <span>{quiz.questions}Q</span>
                     </div>
                   </div>
-                 
+
                   <div className="flex gap-2">
                     <Button variant="outline" size="sm">
                       <Heart className="w-4 h-4" />

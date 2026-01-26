@@ -5,6 +5,7 @@ import { QuestionPaper, Subject, Course, Program } from '@/entities/all';
 import QuestionPaperTable from '../components/papertemplates/QuestionPaperTable';
 import CreatedQuestionPaperSearchFilter from '../components/papertemplates/CreatedQuestionPaperSearchFilter';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from "@/components/ui/card";
 import { FileText } from 'lucide-react';
 
 const questionPaperEntity = new QuestionPaper();
@@ -109,15 +110,19 @@ const CreatedQuestionPapersPage = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-        <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-blue-100">Total Papers</p>
-              <p className="text-2xl font-bold">{questionPapers.length}</p>
+        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-4 bg-violet-50 rounded-xl">
+                <FileText className="w-6 h-6 text-violet-600" />
+              </div>
             </div>
-            <FileText className="w-8 h-8 text-blue-200" />
-          </div>
-        </div>
+            <div>
+              <p className="text-slate-500 text-sm font-medium">Total Papers</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{questionPapers.length}</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <CreatedQuestionPaperSearchFilter onFiltersChange={setFilters} activeFilters={filters} filterData={filterData} />

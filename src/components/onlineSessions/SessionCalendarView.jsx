@@ -34,7 +34,7 @@ export default function SessionCalendarView({
   setCurrentDate,
   onRefresh
 }) {
- 
+
   const navigatePrevious = () => {
     if (calendarView === "daily") setCurrentDate(subDays(currentDate, 1));
     else if (calendarView === "weekly") setCurrentDate(subWeeks(currentDate, 1));
@@ -122,13 +122,13 @@ export default function SessionCalendarView({
               </div>
             ))}
           </div>
-         
+
           {/* Sessions column */}
           <div className="relative">
             {hours.map(hour => (
               <div key={hour} className="h-16 border-b border-slate-200"></div>
             ))}
-           
+
             {/* Render sessions */}
             {daySessions.map((session, idx) => {
               const sessionDate = new Date(session.scheduled_date);
@@ -141,11 +141,11 @@ export default function SessionCalendarView({
               return (
                 <div
                   key={session.id}
-                  className="absolute left-2 right-2 bg-blue-100 border-l-4 border-blue-600 rounded p-2 cursor-pointer hover:bg-blue-200 transition-colors"
+                  className="absolute left-2 right-2 bg-teal-100 border-l-4 border-teal-600 rounded p-2 cursor-pointer hover:bg-teal-200 transition-colors"
                   style={{ top: `${top}px`, height: `${height}px`, minHeight: '40px' }}
                 >
                   <div className="text-sm font-semibold text-blue-900 truncate">{session.title}</div>
-                  <div className="text-xs text-blue-700">{session.instructor_name}</div>
+                  <div className="text-xs text-teal-700">{session.instructor_name}</div>
                   {session.status === 'live' && (
                     <Badge className="bg-red-500 text-white text-xs mt-1">LIVE</Badge>
                   )}
@@ -172,12 +172,12 @@ export default function SessionCalendarView({
           {days.map(day => (
             <div key={day.toString()} className="border-r border-b border-slate-200 bg-slate-50 p-2 text-center">
               <div className="text-xs text-slate-600">{format(day, 'EEE')}</div>
-              <div className={`text-lg font-semibold ${isSameDay(day, new Date()) ? 'text-blue-600' : 'text-slate-900'}`}>
+              <div className={`text-lg font-semibold ${isSameDay(day, new Date()) ? 'text-teal-600' : 'text-slate-900'}`}>
                 {format(day, 'd')}
               </div>
             </div>
           ))}
-         
+
           {/* Time and day columns */}
           {hours.map(hour => (
             <React.Fragment key={hour}>
@@ -196,7 +196,7 @@ export default function SessionCalendarView({
                     {daySessions.map(session => (
                       <div
                         key={session.id}
-                        className="bg-blue-100 border-l-2 border-blue-600 rounded px-1 text-xs truncate cursor-pointer hover:bg-blue-200"
+                        className="bg-blue-100 border-l-2 border-teal-600 rounded px-1 text-xs truncate cursor-pointer hover:bg-teal-200"
                       >
                         {session.title}
                       </div>
@@ -230,7 +230,7 @@ export default function SessionCalendarView({
             </div>
           ))}
         </div>
-       
+
         {/* Calendar grid */}
         {weeks.map((week, weekIdx) => (
           <div key={weekIdx} className="grid grid-cols-7">
@@ -243,22 +243,20 @@ export default function SessionCalendarView({
               return (
                 <div
                   key={day.toString()}
-                  className={`min-h-[120px] border-r border-b border-slate-200 p-2 ${
-                    !isCurrentMonth ? 'bg-slate-50' : ''
-                  }`}
+                  className={`min-h-[120px] border-r border-b border-slate-200 p-2 ${!isCurrentMonth ? 'bg-slate-50' : ''
+                    }`}
                 >
-                  <div className={`text-sm font-semibold mb-2 ${
-                    isToday ? 'bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center' :
+                  <div className={`text-sm font-semibold mb-2 ${isToday ? 'bg-blue-600 text-white w-7 h-7 rounded-full flex items-center justify-center' :
                     isCurrentMonth ? 'text-slate-900' : 'text-slate-400'
-                  }`}>
+                    }`}>
                     {format(day, 'd')}
                   </div>
-                 
+
                   <div className="space-y-1">
                     {daySessions.slice(0, 3).map(session => (
                       <div
                         key={session.id}
-                        className="bg-blue-100 border-l-2 border-blue-600 rounded px-2 py-1 text-xs cursor-pointer hover:bg-blue-200 transition-colors"
+                        className="bg-blue-100 border-l-2 border-teal-600 rounded px-2 py-1 text-xs cursor-pointer hover:bg-teal-200 transition-colors"
                       >
                         <div className="font-medium truncate">{format(new Date(session.scheduled_date), 'h:mm a')}</div>
                         <div className="truncate">{session.title}</div>
@@ -289,29 +287,29 @@ export default function SessionCalendarView({
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {months.map(month => {
           const monthSessions = getSessionsForMonth(month);
-         
+
           return (
             <Card key={month.toString()} className="cursor-pointer hover:shadow-md transition-shadow">
               <CardContent className="p-4">
                 <h3 className="font-semibold text-lg mb-3">{format(month, 'MMMM')}</h3>
-               
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-slate-600">Total Sessions</span>
                     <Badge variant="secondary">{monthSessions.length}</Badge>
                   </div>
-                 
+
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-slate-600">Completed</span>
                     <span className="font-medium">{monthSessions.filter(s => s.status === 'completed').length}</span>
                   </div>
-                 
+
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-slate-600">Upcoming</span>
                     <span className="font-medium">{monthSessions.filter(s => s.status === 'scheduled').length}</span>
                   </div>
                 </div>
-               
+
                 {monthSessions.length > 0 && (
                   <div className="mt-3 pt-3 border-t border-slate-200">
                     <div className="text-xs text-slate-500">Next session:</div>

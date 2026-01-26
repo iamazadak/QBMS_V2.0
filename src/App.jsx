@@ -15,14 +15,10 @@ import TestSeriesPage from "./pages/TestSeriesPage";
 import PreviousYearPapersPage from "./pages/PreviousYearPapersPage";
 import PracticePage from "./pages/PracticePage";
 import FreeQuizzesPage from "./pages/FreeQuizzesPage";
-import ClassroomsPage from "./pages/ClassroomsPage";
-import CandidatesPage from "./pages/CandidatesPage";
-import OnlineSessionsPage from "./pages/OnlineSessionsPage";
 import PaperTemplatesPage from "./pages/PaperTemplatesPage";
 import AttemptedTestsPage from "./pages/AttemptedTestsPage";
 import SavedQuestionsPage from "./pages/SavedQuestionsPage";
 import ReportedQuestionsPage from "./pages/ReportedQuestionsPage";
-import ClassroomDetailsPage from "./pages/ClassroomDetailsPage";
 import PaperPreviewPage from "./pages/PaperPreviewPage";
 import CreatedQuestionPapersPage from "./pages/CreatedQuestionPapersPage";
 
@@ -30,6 +26,7 @@ import { HomeRedirect } from "./components/HomeRedirect";
 
 import AdminDashboardPage from "./pages/AdminDashboardPage";
 import StudentDashboardPage from "./pages/StudentDashboardPage";
+import RolesPage from "./pages/RolesPage";
 
 function App() {
   return (
@@ -110,46 +107,6 @@ function App() {
             }
           />
           <Route
-            path="/classrooms"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <ClassroomsPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/classrooms/:id"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <ClassroomDetailsPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/candidates"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <CandidatesPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/online-sessions"
-            element={
-              <ProtectedRoute>
-                <Layout>
-                  <OnlineSessionsPage />
-                </Layout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
             path="/papertemplates"
             element={
               <ProtectedRoute>
@@ -205,6 +162,16 @@ function App() {
               <ProtectedRoute>
                 <Layout>
                   <ReportedQuestionsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/roles"
+            element={
+              <ProtectedRoute role="admin">
+                <Layout>
+                  <RolesPage />
                 </Layout>
               </ProtectedRoute>
             }

@@ -69,7 +69,7 @@ export default function CreateSessionModal({ isOpen, onClose, programs, courses,
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-   
+
     if (!formData.title || !formData.instructor_name || !formData.scheduled_date) {
       alert("Please fill in all required fields");
       return;
@@ -159,7 +159,7 @@ Please join the session on time.
 
 Best regards,
 Lernern
-              `.	rim()
+              `.rim()
             });
 
 
@@ -197,7 +197,7 @@ Lernern
   const generateZoomMeeting = () => {
     const mockMeetingId = Math.floor(100000000 + Math.random() * 900000000);
     const mockPassword = Math.random().toString(36).substring(7);
-   
+
     setFormData({
       ...formData,
       zoom_meeting_id: mockMeetingId.toString(),
@@ -219,7 +219,7 @@ Lernern
 
 
         <Alert className="bg-blue-50 border-blue-200">
-          <AlertCircle className="h-4 w-4 text-blue-600" />
+          <AlertCircle className="h-4 w-4 text-teal-600" />
           <AlertDescription className="text-blue-800">
             <strong>Note:</strong> Email notifications will be sent automatically. For SMS and WhatsApp notifications, enable backend functions in Dashboard → Settings.
           </AlertDescription>
@@ -264,7 +264,7 @@ Lernern
                 className="mt-1"
               />
             </div>
-           
+
             <div>
               <Label htmlFor="instructor_email">Instructor Email</Label>
               <Input
@@ -300,31 +300,31 @@ Lernern
                   <Checkbox
                     id="email"
                     checked={notificationMethods.email}
-                    onCheckedChange={(checked) => setNotificationMethods({...notificationMethods, email: checked})}
+                    onCheckedChange={(checked) => setNotificationMethods({ ...notificationMethods, email: checked })}
                   />
                   <Mail className="w-4 h-4 text-slate-500" />
                   <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     Email
                   </label>
                 </div>
-               
+
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="sms"
                     checked={notificationMethods.sms}
-                    onCheckedChange={(checked) => setNotificationMethods({...notificationMethods, sms: checked})}
+                    onCheckedChange={(checked) => setNotificationMethods({ ...notificationMethods, sms: checked })}
                   />
                   <Phone className="w-4 h-4 text-slate-500" />
                   <label htmlFor="sms" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                     SMS (requires backend functions)
                   </label>
                 </div>
-               
+
                 <div className="flex items-center space-x-2">
                   <Checkbox
                     id="whatsapp"
                     checked={notificationMethods.whatsapp}
-                    onCheckedChange={(checked) => setNotificationMethods({...notificationMethods, whatsapp: checked})}
+                    onCheckedChange={(checked) => setNotificationMethods({ ...notificationMethods, whatsapp: checked })}
                   />
                   <MessageSquare className="w-4 h-4 text-slate-500" />
                   <label htmlFor="whatsapp" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -356,7 +356,7 @@ Lernern
                 </SelectContent>
               </Select>
             </div>
-           
+
             <div>
               <Label htmlFor="course">Course</Label>
               <Select
@@ -375,7 +375,7 @@ Lernern
                 </SelectContent>
               </Select>
             </div>
-           
+
             <div>
               <Label htmlFor="subject">Subject</Label>
               <Select
@@ -417,7 +417,7 @@ Lernern
                 </PopoverContent>
               </Popover>
             </div>
-           
+
             <div>
               <Label htmlFor="duration">Duration (minutes)</Label>
               <Input

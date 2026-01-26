@@ -54,7 +54,7 @@ export default function ClassroomDetailsPage() {
 
       // Load classroom
       const classroomData = await Classroom.get(classroomId);
-     
+
       // Load program and course
       let program = null;
       let course = null;
@@ -79,7 +79,7 @@ export default function ClassroomDetailsPage() {
         classroomCandidates.map(async (cc) => {
           try {
             const candidate = await Candidate.get(cc.candidate_id);
-           
+
             // Get test attempts for this student
             const attempts = await AttemptedTest.filter({ user_email: candidate.email });
             const avgScore = attempts.length > 0
@@ -109,7 +109,7 @@ export default function ClassroomDetailsPage() {
         classroomTests.map(async (ct) => {
           try {
             const exam = await Exam.get(ct.exam_id);
-           
+
             // Count attempts for this test
             let attempts = 0;
             for (const student of studentsData.filter(s => s !== null)) {
@@ -170,7 +170,7 @@ export default function ClassroomDetailsPage() {
     return (
       <div className="p-6 max-w-7xl mx-auto">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4">Loading classroom details...</p>
         </div>
       </div>
@@ -207,7 +207,7 @@ export default function ClassroomDetailsPage() {
             Back to Classrooms
           </Link>
         </Button>
-       
+
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-3xl font-bold text-slate-900">{classroom.name}</h1>
@@ -229,7 +229,7 @@ export default function ClassroomDetailsPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none">
+        <Card className="bg-gradient-to-r from-teal-500 to-teal-600 text-white border-none">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>

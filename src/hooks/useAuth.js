@@ -9,21 +9,45 @@ export function useAuth() {
 
   useEffect(() => {
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+      async (event, session) => {
+        console.log(`Auth Event: ${event}`);
+
+        if (event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+          setSession(null);
+          setUser(null);
+        } else if (session) {
+          setSession(session);
+          setUser(session.user);
+        }
+
+        if (event === 'TOKEN_REFRESHED') {
+          console.log('Token refreshed successfully');
+        }
+
         setLoading(false);
       }
     );
 
-    // Initial fetch
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    })();
+    // Initial fetch with error handling
+    const initializeAuth = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Session fetch error:", error.message);
+          if (error.message.includes("Refresh Token Not Found") || error.message.includes("invalid_grant")) {
+            await supabase.auth.signOut();
+          }
+        }
+        setSession(session);
+        setUser(session?.user ?? null);
+      } catch (err) {
+        console.error("Unexpected auth error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    initializeAuth();
 
     return () => {
       authListener.subscription.unsubscribe();
@@ -34,13 +58,18 @@ export function useAuth() {
     supabase.auth.signInWithPassword({ email, password });
 
   const signUp = async (email, password, fullName, role) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanName = fullName.trim();
+
+    console.log("Attempting signup with:", { cleanEmail, role, cleanName });
+
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: cleanEmail,
       password,
       options: {
         data: {
-          full_name: fullName,
-          role: role, // Default role
+          full_name: cleanName,
+          role: role,
         },
       },
     });
@@ -49,7 +78,9 @@ export function useAuth() {
       return { data, error };
     }
 
-    // If signup is successful, create a profile entry
+    // If signup is successful, the PROFILE will be created automatically by a Database Trigger.
+    // We do NOT need to manually insert it here anymore.
+    /* 
     if (data.user) {
       const { error: profileError } = await supabase
         .from('profiles')
@@ -62,6 +93,7 @@ export function useAuth() {
         return { data: null, error: profileError };
       }
     }
+    */
 
     return { data, error: null };
   };

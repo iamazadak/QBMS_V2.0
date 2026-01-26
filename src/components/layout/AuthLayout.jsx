@@ -9,15 +9,21 @@ export function AuthLayout() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className={`container relative w-full max-w-4xl min-h-[500px] rounded-lg shadow-lg overflow-hidden ${isSignUp ? 'right-panel-active' : ''}`}>
+      <div className={`container relative w-full max-w-4xl min-h-[600px] rounded-lg shadow-lg overflow-hidden ${isSignUp ? 'right-panel-active' : ''}`}>
         <div className="form-container sign-up-container absolute top-0 h-full left-0 w-1/2 opacity-0">
+          <div className="flex flex-col items-center pt-4 bg-white">
+            <img src="/lernern_logo.jpeg" alt="Lernern Logo" className="h-24 w-auto mb-2" />
+          </div>
           <SignupForm />
         </div>
         <div className="form-container sign-in-container absolute top-0 h-full left-0 w-1/2">
+          <div className="flex flex-col items-center pt-4 bg-white">
+            <img src="/lernern_logo.jpeg" alt="Lernern Logo" className="h-24 w-auto mb-2" />
+          </div>
           <LoginForm />
         </div>
         <div className="overlay-container absolute top-0 left-1/2 w-1/2 h-full overflow-hidden">
-          <div className="overlay bg-gradient-to-r from-blue-500 to-purple-500 relative -left-full h-full w-[200%]">
+          <div className="overlay relative -left-full h-full w-[200%]" style={{ background: 'linear-gradient(to right, #008080, #00a0a0)' }}>
             <div className="overlay-panel overlay-left absolute flex items-center justify-center flex-col px-10 text-center top-0 h-full w-1/2">
               <h1 className="text-white text-2xl font-bold">Welcome Back!</h1>
               <p className="text-white mt-2">Access your account and continue your journey.</p>

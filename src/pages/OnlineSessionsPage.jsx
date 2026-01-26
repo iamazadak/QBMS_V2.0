@@ -114,7 +114,7 @@ export default function OnlineSessionsPage() {
             if (session.subject_id) {
               subject = await Subject.get(session.subject_id);
             }
-           
+
             const attendees = await OnlineSessionAttendee.filter({ session_id: session.id });
             attendeesCount = attendees.length;
           } catch (error) {
@@ -162,7 +162,7 @@ export default function OnlineSessionsPage() {
     return (
       <div className="p-6 max-w-7xl mx-auto">
         <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4">Loading online sessions...</p>
         </div>
       </div>
@@ -204,7 +204,7 @@ export default function OnlineSessionsPage() {
             {isAdmin && (
               <Button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-indigo-600 hover:bg-indigo-700"
+                className="bg-teal-600 hover:bg-teal-700"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Create Session
@@ -216,7 +216,7 @@ export default function OnlineSessionsPage() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none">
+          <Card className="bg-gradient-to-r from-teal-500 to-teal-600 text-white border-none">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -227,7 +227,7 @@ export default function OnlineSessionsPage() {
               </div>
             </CardContent>
           </Card>
-         
+
           <Card className="bg-gradient-to-r from-red-500 to-red-600 text-white border-none">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -239,7 +239,7 @@ export default function OnlineSessionsPage() {
               </div>
             </CardContent>
           </Card>
-         
+
           <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-none">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -251,7 +251,7 @@ export default function OnlineSessionsPage() {
               </div>
             </CardContent>
           </Card>
-         
+
           <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-none">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
@@ -277,7 +277,7 @@ export default function OnlineSessionsPage() {
               className="pl-10"
             />
           </div>
-         
+
           <Select value={programFilter} onValueChange={setProgramFilter}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Program" />
@@ -289,7 +289,7 @@ export default function OnlineSessionsPage() {
               ))}
             </SelectContent>
           </Select>
-         
+
           <Select value={courseFilter} onValueChange={setCourseFilter}>
             <SelectTrigger className="w-48">
               <SelectValue placeholder="Course" />
@@ -337,7 +337,7 @@ export default function OnlineSessionsPage() {
                     </p>
                     {isAdmin && (
                       <Button
-                        className="bg-blue-600 hover:bg-blue-700"
+                        className="bg-teal-600 hover:bg-teal-700"
                         onClick={() => setShowCreateModal(true)}
                       >
                         <Plus className="w-4 h-4 mr-2" />
@@ -439,13 +439,13 @@ function SessionCard({ session, onRefresh }) {
               <p className="text-slate-600 text-sm">by {session.instructor_name}</p>
             </div>
           </div>
-         
+
           {session.description && (
             <p className="text-slate-600 text-sm mb-4 line-clamp-2">
               {session.description}
             </p>
           )}
-         
+
           <div className="grid grid-cols-2 gap-3 mb-4 text-sm text-slate-600">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
@@ -464,7 +464,7 @@ function SessionCard({ session, onRefresh }) {
               <span>{session.duration_minutes} min</span>
             </div>
           </div>
-         
+
           <div className="flex gap-2">
             {isLive ? (
               <Button

@@ -186,7 +186,7 @@ export default function QuestionTable({
                           <Button
                             variant="ghost"
                             size="icon"
-                            className={`h-8 w-8 ${expandedQuestion === question.id ? 'text-blue-600' : ''}`}
+                            className={`h-8 w-8 ${expandedQuestion === question.id ? 'text-teal-600' : ''}`}
                             onClick={() => toggleExpandQuestion(question.id)}
                           >
                             <Eye className="h-4 w-4" />

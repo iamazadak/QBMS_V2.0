@@ -341,7 +341,7 @@ export default function ClassroomsPage() {
       <div className="p-6 max-w-7xl mx-auto">
         <Card>
           <CardContent className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
             <p className="text-slate-600 ml-4">Loading classrooms...</p>
           </CardContent>
         </Card>
@@ -364,7 +364,7 @@ export default function ClassroomsPage() {
               Assign Test ({selectedClassrooms.length})
             </Button>
           )}
-          <Button onClick={() => setShowAddModal(true)} className="bg-blue-600 hover:bg-blue-700">
+          <Button onClick={() => setShowAddModal(true)} className="bg-teal-600 hover:bg-teal-700">
             <Plus className="w-4 h-4 mr-2" />
             Create Classroom
           </Button>
@@ -373,7 +373,7 @@ export default function ClassroomsPage() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none">
+        <Card className="bg-gradient-to-r from-teal-500 to-teal-600 text-white border-none">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -485,7 +485,7 @@ export default function ClassroomsPage() {
                         <p className="text-sm mt-2">Create your first classroom to get started.</p>
                         <Button
                           onClick={() => setShowAddModal(true)}
-                          className="mt-4 bg-blue-600 hover:bg-blue-700"
+                          className="mt-4 bg-teal-600 hover:bg-teal-700"
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Create Classroom

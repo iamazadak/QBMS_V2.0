@@ -130,7 +130,7 @@ export default function AddEditPaperTemplateModal({
     const newErrors = {};
     if (!formData.title) newErrors.title = "Required";
     if (!formData.exam_type) newErrors.exam_type = "Required";
-    
+
     const sectionErrors = [];
     sections.forEach((section, index) => {
       const error = {};
@@ -201,7 +201,7 @@ export default function AddEditPaperTemplateModal({
       <DialogContent className="max-w-5xl max-h-[95vh] overflow-y-auto bg-gradient-to-b from-gray-50 to-white rounded-2xl shadow-xl p-8">
         <DialogHeader className="border-b border-gray-200 pb-4 mb-6">
           <DialogTitle className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <FileText className="w-7 h-7 text-blue-500" />
+            <FileText className="w-7 h-7 text-teal-500" />
             {template ? "Edit Paper Template" : "Add New Paper Template"}
           </DialogTitle>
           <DialogDescription>
@@ -420,7 +420,7 @@ export default function AddEditPaperTemplateModal({
               <Card className="border-none bg-white shadow-lg rounded-2xl overflow-hidden">
                 <CardHeader className="bg-blue-50 p-3">
                   <CardTitle className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-blue-500" />
+                    <FileText className="w-4 h-4 text-teal-500" />
                     Template Summary
                   </CardTitle>
                 </CardHeader>
@@ -430,25 +430,25 @@ export default function AddEditPaperTemplateModal({
                       whileHover={{ scale: 1.05 }}
                       className="text-center p-3 bg-blue-50 rounded-xl shadow-sm"
                     >
-                      <p className="text-2xl font-bold text-blue-600">{sections.length}</p>
-                      <p className="text-xs text-blue-700">Sections</p>
+                      <p className="text-2xl font-bold text-teal-600">{sections.length}</p>
+                      <p className="text-xs text-teal-700">Sections</p>
                     </motion.div>
                     <motion.div
                       whileHover={{ scale: 1.05 }}
                       className="text-center p-3 bg-blue-50 rounded-xl shadow-sm"
                     >
-                      <p className="text-2xl font-bold text-blue-600">{calculateTotalTemplateMarks()}</p>
-                      <p className="text-xs text-blue-700">Total Marks</p>
+                      <p className="text-2xl font-bold text-teal-600">{calculateTotalTemplateMarks()}</p>
+                      <p className="text-xs text-teal-700">Total Marks</p>
                     </motion.div>
                   </div>
 
                   <div className="pt-2 border-t border-gray-200">
                     <div className="flex items-center gap-2 text-xs text-gray-600">
-                      <FileText className="w-4 h-4 text-blue-500" />
+                      <FileText className="w-4 h-4 text-teal-500" />
                       <span>{formData.exam_type} Exam</span>
                     </div>
                     <div className="flex items-center gap-2 text-xs text-gray-600">
-                      <FileText className="w-4 h-4 text-blue-500" />
+                      <FileText className="w-4 h-4 text-teal-500" />
                       <span>{formData.year} {formData.semester}</span>
                     </div>
                   </div>
@@ -471,7 +471,7 @@ export default function AddEditPaperTemplateModal({
             type="button"
             onClick={handleSubmit}
             disabled={isLoading}
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl px-6 py-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="bg-teal-600 hover:bg-teal-700 text-white rounded-xl px-6 py-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {isLoading && (
               <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">

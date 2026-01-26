@@ -1,0 +1,253 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.courses (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  program_id uuid,
+  name text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT courses_pkey PRIMARY KEY (id),
+  CONSTRAINT courses_program_id_fkey FOREIGN KEY (program_id) REFERENCES public.programs(id)
+);
+CREATE TABLE public.exam_analytics (
+  exam_id uuid NOT NULL,
+  average_score real,
+  highest_score real,
+  completion_rate real,
+  average_time_taken_minutes real,
+  last_updated timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT exam_analytics_pkey PRIMARY KEY (exam_id),
+  CONSTRAINT exam_analytics_exam_id_fkey FOREIGN KEY (exam_id) REFERENCES public.exams(id)
+);
+CREATE TABLE public.exam_attempts (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  student_id uuid,
+  exam_id uuid,
+  started_at timestamp with time zone DEFAULT now(),
+  completed_at timestamp with time zone,
+  time_remaining_seconds integer,
+  score real,
+  total_correct integer,
+  total_incorrect integer,
+  total_unanswered integer,
+  percentile real,
+  accuracy real,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT exam_attempts_pkey PRIMARY KEY (id),
+  CONSTRAINT exam_attempts_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.profiles(id),
+  CONSTRAINT exam_attempts_exam_id_fkey FOREIGN KEY (exam_id) REFERENCES public.exams(id)
+);
+CREATE TABLE public.exam_questions (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  section_id uuid,
+  question_id uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  exam_id uuid NOT NULL,
+  CONSTRAINT exam_questions_pkey PRIMARY KEY (id),
+  CONSTRAINT exam_questions_section_id_fkey FOREIGN KEY (section_id) REFERENCES public.exam_sections(id),
+  CONSTRAINT exam_questions_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id)
+);
+CREATE TABLE public.exam_sections (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  exam_id uuid,
+  name text NOT NULL,
+  duration_minutes integer NOT NULL,
+  section_order integer NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT exam_sections_pkey PRIMARY KEY (id),
+  CONSTRAINT exam_sections_exam_id_fkey FOREIGN KEY (exam_id) REFERENCES public.exams(id)
+);
+CREATE TABLE public.exams (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  course_id uuid,
+  title text NOT NULL,
+  type text NOT NULL,
+  is_published boolean DEFAULT false,
+  creator_id uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  editor_link text,
+  respondent_link text,
+  CONSTRAINT exams_pkey PRIMARY KEY (id),
+  CONSTRAINT exams_course_id_fkey FOREIGN KEY (course_id) REFERENCES public.courses(id),
+  CONSTRAINT exams_creator_id_fkey FOREIGN KEY (creator_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.options (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  question_id uuid,
+  option_text text NOT NULL,
+  is_correct boolean NOT NULL DEFAULT false,
+  created_at timestamp with time zone DEFAULT now(),
+  option_label text,
+  CONSTRAINT options_pkey PRIMARY KEY (id),
+  CONSTRAINT options_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id)
+);
+CREATE TABLE public.paper_templates (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  title text,
+  institution_name text,
+  program_name text,
+  subject_name text,
+  subject_code text,
+  exam_type text,
+  year text,
+  semester text,
+  full_marks integer,
+  time_duration text,
+  general_instructions text,
+  bilingual boolean DEFAULT false,
+  footer_text text,
+  access_control text,
+  subject_id uuid,
+  course_id uuid,
+  program_id uuid,
+  CONSTRAINT paper_templates_pkey PRIMARY KEY (id),
+  CONSTRAINT fk_subject FOREIGN KEY (subject_id) REFERENCES public.subjects(id),
+  CONSTRAINT fk_course FOREIGN KEY (course_id) REFERENCES public.courses(id),
+  CONSTRAINT fk_program FOREIGN KEY (program_id) REFERENCES public.programs(id)
+);
+CREATE TABLE public.profiles (
+  id uuid NOT NULL,
+  full_name text,
+  role text NOT NULL CHECK (role = ANY (ARRAY['student'::text, 'admin'::text])),
+  updated_at timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT profiles_pkey PRIMARY KEY (id),
+  CONSTRAINT profiles_id_fkey FOREIGN KEY (id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.programs (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  name text NOT NULL,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT programs_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.question_analytics (
+  question_id uuid NOT NULL,
+  correct_answer_percentage real,
+  average_time_spent_seconds real,
+  last_updated timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT question_analytics_pkey PRIMARY KEY (question_id),
+  CONSTRAINT question_analytics_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id)
+);
+CREATE TABLE public.question_bookmarks (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  student_id uuid,
+  question_id uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT question_bookmarks_pkey PRIMARY KEY (id),
+  CONSTRAINT question_bookmarks_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.profiles(id),
+  CONSTRAINT question_bookmarks_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id)
+);
+CREATE TABLE public.question_feedback (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  student_id uuid,
+  question_id uuid,
+  feedback_text text NOT NULL,
+  status text DEFAULT 'pending'::text CHECK (status = ANY (ARRAY['pending'::text, 'resolved'::text])),
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT question_feedback_pkey PRIMARY KEY (id),
+  CONSTRAINT question_feedback_student_id_fkey FOREIGN KEY (student_id) REFERENCES public.profiles(id),
+  CONSTRAINT question_feedback_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id)
+);
+CREATE TABLE public.question_paper_questions (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  question_paper_section_id uuid,
+  question_id uuid,
+  CONSTRAINT question_paper_questions_pkey PRIMARY KEY (id),
+  CONSTRAINT question_paper_questions_question_paper_section_id_fkey FOREIGN KEY (question_paper_section_id) REFERENCES public.question_paper_sections(id),
+  CONSTRAINT question_paper_questions_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id)
+);
+CREATE TABLE public.question_paper_sections (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  question_paper_id uuid,
+  template_section_id uuid,
+  CONSTRAINT question_paper_sections_pkey PRIMARY KEY (id),
+  CONSTRAINT question_paper_sections_question_paper_id_fkey FOREIGN KEY (question_paper_id) REFERENCES public.question_papers(id),
+  CONSTRAINT question_paper_sections_template_section_id_fkey FOREIGN KEY (template_section_id) REFERENCES public.template_sections(id)
+);
+CREATE TABLE public.question_papers (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  template_id uuid,
+  title text,
+  CONSTRAINT question_papers_pkey PRIMARY KEY (id),
+  CONSTRAINT question_papers_template_id_fkey FOREIGN KEY (template_id) REFERENCES public.paper_templates(id)
+);
+CREATE TABLE public.question_tags (
+  question_id uuid NOT NULL,
+  tag_id uuid NOT NULL,
+  CONSTRAINT question_tags_pkey PRIMARY KEY (question_id, tag_id),
+  CONSTRAINT question_tags_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id),
+  CONSTRAINT question_tags_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tags(id)
+);
+CREATE TABLE public.questions (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  subject_id uuid,
+  question_text text NOT NULL,
+  solution_explanation text,
+  level text NOT NULL CHECK (level = ANY (ARRAY['easy'::text, 'medium'::text, 'hard'::text])),
+  positive_marks real NOT NULL DEFAULT 1,
+  negative_marks real NOT NULL DEFAULT 0,
+  creator_id uuid,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT questions_pkey PRIMARY KEY (id),
+  CONSTRAINT questions_subject_id_fkey FOREIGN KEY (subject_id) REFERENCES public.subjects(id),
+  CONSTRAINT questions_creator_id_fkey FOREIGN KEY (creator_id) REFERENCES auth.users(id)
+);
+CREATE TABLE public.student_answers (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  attempt_id uuid,
+  question_id uuid,
+  selected_option_id uuid,
+  time_spent_seconds integer,
+  status text NOT NULL DEFAULT 'not_visited'::text CHECK (status = ANY (ARRAY['not_visited'::text, 'not_answered'::text, 'answered'::text, 'marked_for_review'::text, 'answered_and_marked'::text])),
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT student_answers_pkey PRIMARY KEY (id),
+  CONSTRAINT student_answers_attempt_id_fkey FOREIGN KEY (attempt_id) REFERENCES public.exam_attempts(id),
+  CONSTRAINT student_answers_question_id_fkey FOREIGN KEY (question_id) REFERENCES public.questions(id),
+  CONSTRAINT student_answers_selected_option_id_fkey FOREIGN KEY (selected_option_id) REFERENCES public.options(id)
+);
+CREATE TABLE public.subjects (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  course_id uuid,
+  name text NOT NULL,
+  year integer,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT subjects_pkey PRIMARY KEY (id),
+  CONSTRAINT subjects_course_id_fkey FOREIGN KEY (course_id) REFERENCES public.courses(id)
+);
+CREATE TABLE public.tags (
+  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  name text NOT NULL UNIQUE,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT tags_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.template_sections (
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
+  created_at timestamp with time zone NOT NULL DEFAULT now(),
+  template_id uuid,
+  name text,
+  type text,
+  num_questions integer,
+  total_marks integer,
+  marks_per_question text,
+  choice_enabled boolean DEFAULT false,
+  choice_x integer,
+  choice_y integer,
+  CONSTRAINT template_sections_pkey PRIMARY KEY (id),
+  CONSTRAINT template_sections_template_id_fkey FOREIGN KEY (template_id) REFERENCES public.paper_templates(id)
+);
+CREATE TABLE public.user_performance_analytics (
+  user_id uuid NOT NULL,
+  average_percentile real,
+  average_accuracy real,
+  tests_attempted integer,
+  last_updated timestamp with time zone,
+  created_at timestamp with time zone DEFAULT now(),
+  CONSTRAINT user_performance_analytics_pkey PRIMARY KEY (user_id),
+  CONSTRAINT user_performance_analytics_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.profiles(id)
+);

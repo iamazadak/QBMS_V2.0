@@ -1,11 +1,9 @@
 import React from 'react';
+import DashboardPage from './DashboardPage';
 
 const AdminDashboardPage = () => {
   return (
-    <div>
-      <h1>Admin Dashboard</h1>
-      <p>Welcome, Admin!</p>
-    </div>
+    <DashboardPage roleName="Admin" />
   );
 };
 

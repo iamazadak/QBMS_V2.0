@@ -53,7 +53,7 @@ export function ForgotPasswordModal() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <button className="text-blue-500 underline">Forgot Password?</button>
+        <button className="text-teal-500 underline">Forgot Password?</button>
       </DialogTrigger>
       <DialogContent className="bg-white p-6 rounded-lg shadow-lg">
         {step === 1 && (
