@@ -196,7 +196,11 @@ export default function QuestionsPage() {
 
 
   const getSelectedQuestionObjects = () => {
-    return filteredQuestions.filter(q => selectedQuestions.includes(q.id));
+    // Robust mapping from IDs to full objects using the master questions list
+    // Handles string/number ID mismatches and works regardless of current filters/pagination
+    return questions.filter(q =>
+      selectedQuestions.some(id => String(id) === String(q.id))
+    );
   };
 
 

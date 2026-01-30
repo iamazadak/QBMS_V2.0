@@ -137,7 +137,7 @@ export default function CreateQuizModal({ isOpen, onClose, selectedQuestions, on
         const assessmentPayload = {
             assessment_meta: {
                 title: formData.title,
-                description: formData.description, // Exclusive to Google Forms
+                description: formData.description,
                 program_name: programName,
                 course_name: courseName,
                 subject_name: subjectName,
@@ -158,21 +158,31 @@ export default function CreateQuizModal({ isOpen, onClose, selectedQuestions, on
                 mobile: formData.require_mobile,
                 industry: formData.require_industry
             },
-            questions: selectedQuestions.map((q, i) => {
+            questions: (selectedQuestions || []).map((q, i) => {
                 const optionsMap = {};
-                q.options?.forEach(opt => {
-                    optionsMap[opt.option_label] = opt.option_text;
+                (q.options || []).forEach(opt => {
+                    if (opt.option_label) {
+                        optionsMap[opt.option_label] = opt.option_text || "";
+                    }
                 });
 
                 return {
-                    question_text: q.question_text,
+                    question_text: q.question_text || "Empty Question",
                     options: optionsMap,
-                    correct_option: q.options?.find(opt => opt.is_correct)?.option_label || "A",
+                    correct_option: (q.options || []).find(opt => !!opt.is_correct)?.option_label || "A",
                     marks: q.positive_marks || 1,
                     explanation: q.explanation || ""
                 };
             })
         };
+
+        console.log("--- GOOGLE FORM PAYLOAD ---");
+        console.log("Questions Count:", assessmentPayload.questions.length);
+        console.log("Payload:", JSON.stringify(assessmentPayload, null, 2));
+
+        if (assessmentPayload.questions.length === 0) {
+            console.error("CRITICAL: Attempting to create quiz with 0 questions!");
+        }
 
         const response = await fetch('/api/google-form-proxy', {
             method: 'POST',
@@ -180,7 +190,11 @@ export default function CreateQuizModal({ isOpen, onClose, selectedQuestions, on
             body: JSON.stringify(assessmentPayload)
         });
 
-        if (!response.ok) throw new Error("Failed to push to Google Form");
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            console.error("Proxy Error Response:", errorData);
+            throw new Error(errorData.details || "Failed to push to Google Form");
+        }
         return await response.json();
     };
 
