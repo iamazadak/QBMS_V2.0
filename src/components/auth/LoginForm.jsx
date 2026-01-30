@@ -34,9 +34,8 @@ export function LoginForm() {
         return;
       }
 
-      // If no error, we still wait for the profile to be updated via useProfile (which uses useAuth's user)
+      // AuthProvider will handle redirection automatically once state is updated
       setMessage('Login successful! Redirecting...');
-      setTimeout(() => navigate('/'), 1000);
     } catch (error) {
       console.error('Login error:', error);
       setMessage('An unexpected error occurred during login.');
