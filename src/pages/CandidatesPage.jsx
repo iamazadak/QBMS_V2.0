@@ -5,19 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Plus, Search, Download, Filter, Eye, Edit2, Trash2, UserPlus, CalendarIcon } from "lucide-react";
+import { Users, Plus, Search, Download, Filter, Eye, Edit2, Trash2, UserPlus, CalendarIcon, CheckCircle, Clock, GraduationCap } from "lucide-react";
 import { Candidate, Program, Course, Classroom } from "@/entities/all";
 import { format } from "date-fns";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import AddCandidateModal from "@/components/candidates/AddCandidateModal";
 
 export default function CandidatesPage() {
@@ -32,16 +22,6 @@ export default function CandidatesPage() {
   const [programFilter, setProgramFilter] = useState("all");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCandidate, setEditingCandidate] = useState(null);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    student_id: "",
-    program_id: "",
-    course_id: "",
-    enrollment_date: null,
-    status: "active",
-  });
 
   const loadData = async () => {
     setIsLoading(true);
@@ -185,48 +165,14 @@ export default function CandidatesPage() {
     }
   };
 
-  const handleAddEditCandidate = async () => {
-    try {
-      if (editingCandidate) {
-        await Candidate.update(editingCandidate.id, formData);
-      } else {
-        await Candidate.create(formData);
-      }
-      setShowAddModal(false);
-      setEditingCandidate(null);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        student_id: "",
-        program_id: "",
-        course_id: "",
-        classroom_id: "",
-        gooru_id: "",
-        enrollment_date: null,
-        status: "active",
-      });
-      loadData();
-    } catch (error) {
-      console.error("Error saving candidate:", error);
-      alert("Error saving candidate. Please try again.");
-    }
+  const handleAddEditCandidate = () => {
+    setShowAddModal(false);
+    setEditingCandidate(null);
+    loadData();
   };
 
   const handleEditCandidate = (candidate) => {
     setEditingCandidate(candidate);
-    setFormData({
-      name: candidate.name,
-      email: candidate.email,
-      phone: candidate.phone || "",
-      student_id: candidate.student_id || "",
-      program_id: candidate.program_id || "",
-      course_id: candidate.course_id || "",
-      classroom_id: candidate.classroom_id || "",
-      gooru_id: candidate.gooru_id || "",
-      enrollment_date: candidate.enrollment_date ? new Date(candidate.enrollment_date) : null,
-      status: candidate.status || "active",
-    });
     setShowAddModal(true);
   };
 
@@ -235,69 +181,134 @@ export default function CandidatesPage() {
     alert(`Viewing details for ${candidate.name}`);
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
 
   return (
-    <div className="container mx-auto p-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
-            Candidates Management
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1 flex items-center gap-2">
-              <Search className="h-4 w-4 text-gray-500" />
+    <div className="p-4 md:p-6 pb-20 md:pb-6">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 md:mb-8">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Candidates Management</h1>
+          <p className="text-slate-600 mt-1 md:mt-2 text-sm md:text-base">Manage and track your enrolled student information</p>
+        </div>
+
+        <div className="flex flex-wrap gap-2 md:gap-3 w-full lg:w-auto">
+          <Button variant="outline" onClick={exportToCSV} disabled={filteredCandidates.length === 0} className="flex-1 md:flex-none text-sm justify-center hover:bg-emerald-500 hover:text-white transition-all">
+            <Download className="w-4 h-4 mr-2" />
+            Export CSV
+          </Button>
+          <Button onClick={() => setShowAddModal(true)} variant="default" className="flex-1 md:flex-none text-sm justify-center hover:bg-emerald-500 hover:text-white transition-all">
+            <UserPlus className="w-4 h-4 mr-2" />
+            Add Candidate
+          </Button>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <div className="p-2 md:p-4 bg-violet-50 rounded-xl">
+                <Users className="w-4 h-4 md:w-6 md:h-6 text-violet-600" />
+              </div>
+            </div>
+            <div>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Total Candidates</p>
+              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{candidates.length}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <div className="p-2 md:p-4 bg-emerald-50 rounded-xl">
+                <CheckCircle className="w-4 h-4 md:w-6 md:h-6 text-emerald-600" />
+              </div>
+            </div>
+            <div>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Active</p>
+              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{candidates.filter(c => c.status === 'active').length}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <div className="p-2 md:p-4 bg-blue-50 rounded-xl">
+                <GraduationCap className="w-4 h-4 md:w-6 md:h-6 text-blue-600" />
+              </div>
+            </div>
+            <div>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Graduated</p>
+              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{candidates.filter(c => c.status === 'graduated').length}</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <div className="p-2 md:p-4 bg-amber-50 rounded-xl">
+                <Clock className="w-4 h-4 md:w-6 md:h-6 text-amber-600" />
+              </div>
+            </div>
+            <div>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Inactive</p>
+              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{candidates.filter(c => c.status === 'inactive').length}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters and Table Card */}
+      <Card className="border-slate-200/60 shadow-sm overflow-hidden">
+        <CardContent className="p-0">
+          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row gap-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="Search candidates..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
+                className="pl-10 bg-white"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="graduated">Graduated</SelectItem>
-                <SelectItem value="dropped">Dropped</SelectItem>
-                <SelectItem value="suspended">Suspended</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={programFilter} onValueChange={setProgramFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by program" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Programs</SelectItem>
-                {programs.map(program => (
-                  <SelectItem key={program.id} value={program.id}>
-                    {program.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Button onClick={() => setShowAddModal(true)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Candidate
-            </Button>
-            <Button onClick={exportToCSV} variant="outline">
-              <Download className="h-4 w-4 mr-2" />
-              Export CSV
-            </Button>
+            <div className="flex gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[150px] bg-white">
+                  <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Statuses</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="inactive">Inactive</SelectItem>
+                  <SelectItem value="graduated">Graduated</SelectItem>
+                  <SelectItem value="dropped">Dropped</SelectItem>
+                  <SelectItem value="suspended">Suspended</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={programFilter} onValueChange={setProgramFilter}>
+                <SelectTrigger className="w-[180px] bg-white">
+                  <SelectValue placeholder="Program" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Programs</SelectItem>
+                  {programs.map(program => (
+                    <SelectItem key={program.id} value={program.id}>
+                      {program.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {isLoading ? (
-            <div>Loading...</div>
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+            </div>
           ) : (
             <Table>
               <TableHeader>
@@ -365,142 +376,17 @@ export default function CandidatesPage() {
         </CardContent>
       </Card>
 
-      <Dialog open={showAddModal} onOpenChange={setShowAddModal}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{editingCandidate ? 'Edit Candidate' : 'Add New Candidate'}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="name" className="text-right">Name</Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="email" className="text-right">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="phone" className="text-right">Phone</Label>
-              <Input
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="student_id" className="text-right">Student ID</Label>
-              <Input
-                id="student_id"
-                name="student_id"
-                value={formData.student_id}
-                onChange={handleInputChange}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="program_id" className="text-right">Program</Label>
-              <Select
-                name="program_id"
-                value={formData.program_id}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, program_id: value }))}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select program" />
-                </SelectTrigger>
-                <SelectContent>
-                  {programs.map(program => (
-                    <SelectItem key={program.id} value={program.id}>
-                      {program.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="course_id" className="text-right">Course</Label>
-              <Select
-                name="course_id"
-                value={formData.course_id}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, course_id: value }))}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select course" />
-                </SelectTrigger>
-                <SelectContent>
-                  {courses.map(course => (
-                    <SelectItem key={course.id} value={course.id}>
-                      {course.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="enrollment_date" className="text-right">Enrollment Date</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="col-span-3 justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.enrollment_date ? format(formData.enrollment_date, 'PPP') : 'Pick a date'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={formData.enrollment_date}
-                    onSelect={(date) => setFormData(prev => ({ ...prev, enrollment_date: date }))}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="status" className="text-right">Status</Label>
-              <Select
-                name="status"
-                value={formData.status}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}
-              >
-                <SelectTrigger className="col-span-3">
-                  <SelectValue placeholder="Select status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="graduated">Graduated</SelectItem>
-                  <SelectItem value="dropped">Dropped</SelectItem>
-                  <SelectItem value="suspended">Suspended</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowAddModal(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddEditCandidate}>
-              {editingCandidate ? 'Update' : 'Create'}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddCandidateModal
+        isOpen={showAddModal}
+        onClose={() => {
+          setShowAddModal(false);
+          setEditingCandidate(null);
+        }}
+        candidate={editingCandidate}
+        programs={programs}
+        courses={courses}
+        onSave={handleAddEditCandidate}
+      />
     </div>
   );
 }
