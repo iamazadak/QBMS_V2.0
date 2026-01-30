@@ -6,9 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Users, Plus, Search, Edit2, Trash2, BookOpen, Eye, UserPlus } from "lucide-react";
+import { Users, Plus, Search, Edit2, Trash2, BookOpen, Eye, UserPlus, GraduationCap, CheckCircle, Clock } from "lucide-react";
 import { Classroom, ClassroomCandidate, Program, Course } from "@/entities/all";
 import { format } from "date-fns";
+import AddClassroomModal from "@/components/classrooms/AddClassroomModal";
+import AssignTestModal from "@/components/classrooms/AssignTestModal";
+import ManageCandidatesModal from "@/components/classrooms/ManageCandidatesModal";
 import {
   Dialog,
   DialogContent,
@@ -22,171 +25,6 @@ import { createPageUrl } from "@/utils";
 import { Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast"; // Assuming shadcn/ui toast component
 
-// Mock modal components (to be replaced with actual implementations)
-const AddClassroomModal = ({ isOpen, onClose, classroom, programs, courses, onSave }) => {
-  const [formData, setFormData] = useState({
-    name: classroom?.name || "",
-    description: classroom?.description || "",
-    program_id: classroom?.program_id || "",
-    course_id: classroom?.course_id || "",
-    teacher_name: classroom?.teacher_name || "",
-    teacher_email: classroom?.teacher_email || "",
-    is_active: classroom?.is_active ?? true,
-  });
-
-  const handleSubmit = async () => {
-    if (!formData.name || !formData.teacher_name) {
-      toast({ variant: "destructive", description: "Name and Teacher Name are required" });
-      return;
-    }
-    try {
-      if (classroom) {
-        await Classroom.update(classroom.id, formData);
-      } else {
-        await Classroom.create(formData);
-      }
-      onSave();
-      toast({ description: `Classroom ${classroom ? "updated" : "created"} successfully` });
-    } catch (error) {
-      toast({ variant: "destructive", description: "Error saving classroom" });
-    }
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{classroom ? "Edit Classroom" : "Create Classroom"}</DialogTitle>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="name" className="text-right">Name</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="description" className="text-right">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="program_id" className="text-right">Program</Label>
-            <Select
-              value={formData.program_id}
-              onValueChange={(value) => setFormData({ ...formData, program_id: value })}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select program" />
-              </SelectTrigger>
-              <SelectContent>
-                {programs.map((program) => (
-                  <SelectItem key={program.id} value={program.id}>{program.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="course_id" className="text-right">Course</Label>
-            <Select
-              value={formData.course_id}
-              onValueChange={(value) => setFormData({ ...formData, course_id: value })}
-            >
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select course" />
-              </SelectTrigger>
-              <SelectContent>
-                {courses.map((course) => (
-                  <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="teacher_name" className="text-right">Teacher Name</Label>
-            <Input
-              id="teacher_name"
-              value={formData.teacher_name}
-              onChange={(e) => setFormData({ ...formData, teacher_name: e.target.value })}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="teacher_email" className="text-right">Teacher Email</Label>
-            <Input
-              id="teacher_email"
-              value={formData.teacher_email}
-              onChange={(e) => setFormData({ ...formData, teacher_email: e.target.value })}
-              className="col-span-3"
-            />
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="is_active" className="text-right">Active</Label>
-            <Checkbox
-              id="is_active"
-              checked={formData.is_active}
-              onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
-              className="col-span-3"
-            />
-          </div>
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={handleSubmit}>{classroom ? "Update" : "Create"}</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-const AssignTestModal = ({ isOpen, onClose, selectedClassrooms, onAssign }) => {
-  // Simplified mock implementation
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Assign Test</DialogTitle>
-        </DialogHeader>
-        <div className="py-4">
-          <p>Assign test to {selectedClassrooms.length} classroom(s)</p>
-          {/* Add test selection logic here */}
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={onAssign}>Assign</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
-const ManageCandidatesModal = ({ isOpen, onClose, classroom, onUpdate }) => {
-  // Simplified mock implementation
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Manage Candidates for {classroom?.name}</DialogTitle>
-        </DialogHeader>
-        <div className="py-4">
-          <p>Manage candidates for classroom {classroom?.id}</p>
-          {/* Add candidate selection logic here */}
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={onClose}>Cancel</Button>
-          <Button onClick={onUpdate}>Save</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
 
 export default function ClassroomsPage() {
   const { toast } = useToast();
@@ -372,50 +210,59 @@ export default function ClassroomsPage() {
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-gradient-to-r from-teal-500 to-teal-600 text-white border-none">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-blue-100">Total Classrooms</p>
-                <p className="text-2xl font-bold">{classrooms.length}</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <div className="p-2 md:p-4 bg-violet-50 rounded-xl">
+                <Users className="w-4 h-4 md:w-6 md:h-6 text-violet-600" />
               </div>
-              <Users className="w-8 h-8 text-blue-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Total Classrooms</p>
+              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{classrooms.length}</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-none">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-green-100">Active Classrooms</p>
-                <p className="text-2xl font-bold">{classrooms.filter((c) => c.is_active).length}</p>
+
+        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <div className="p-2 md:p-4 bg-emerald-50 rounded-xl">
+                <CheckCircle className="w-4 h-4 md:w-6 md:h-6 text-emerald-600" />
               </div>
-              <div className="w-8 h-8 rounded-full bg-green-200 flex items-center justify-center">
-                <span className="text-green-600 font-bold text-sm">A</span>
-              </div>
+            </div>
+            <div>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Active</p>
+              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{classrooms.filter((c) => c.is_active).length}</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-none">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-purple-100">Total Students</p>
-                <p className="text-2xl font-bold">{classrooms.reduce((sum, c) => sum + (c.candidateCount || 0), 0)}</p>
+
+        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <div className="p-2 md:p-4 bg-blue-50 rounded-xl">
+                <Users className="w-4 h-4 md:w-6 md:h-6 text-blue-600" />
               </div>
-              <Users className="w-8 h-8 text-purple-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Total Students</p>
+              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{classrooms.reduce((sum, c) => sum + (c.candidateCount || 0), 0)}</p>
             </div>
           </CardContent>
         </Card>
-        <Card className="bg-gradient-to-r from-orange-500 to-orange-600 text-white border-none">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-orange-100">Programs</p>
-                <p className="text-2xl font-bold">{programs.length}</p>
+
+        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
+          <CardContent className="p-4 md:p-6">
+            <div className="flex items-center justify-between mb-2 md:mb-4">
+              <div className="p-2 md:p-4 bg-amber-50 rounded-xl">
+                <BookOpen className="w-4 h-4 md:w-6 md:h-6 text-amber-600" />
               </div>
-              <BookOpen className="w-8 h-8 text-orange-200" />
+            </div>
+            <div>
+              <p className="text-slate-500 text-xs md:text-sm font-medium">Programs</p>
+              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{programs.length}</p>
             </div>
           </CardContent>
         </Card>
@@ -429,31 +276,33 @@ export default function ClassroomsPage() {
             placeholder="Search by classroom or teacher name..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 bg-white"
           />
         </div>
-        <Select value={programFilter} onValueChange={setProgramFilter}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Program" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Programs</SelectItem>
-            {programs.map((program) => (
-              <SelectItem key={program.id} value={program.id}>{program.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={courseFilter} onValueChange={setCourseFilter}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Course" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Courses</SelectItem>
-            {courses.map((course) => (
-              <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2">
+          <Select value={programFilter} onValueChange={setProgramFilter}>
+            <SelectTrigger className="w-[180px] bg-white">
+              <SelectValue placeholder="Program" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Programs</SelectItem>
+              {programs.map((program) => (
+                <SelectItem key={program.id} value={program.id}>{program.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={courseFilter} onValueChange={setCourseFilter}>
+            <SelectTrigger className="w-[180px] bg-white">
+              <SelectValue placeholder="Course" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Courses</SelectItem>
+              {courses.map((course) => (
+                <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Classrooms Table */}
