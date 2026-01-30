@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { LoginForm } from '../auth/LoginForm';
 import { SignupForm } from '../auth/SignupForm';
 import { ForgotPasswordModal } from '../auth/ForgotPasswordModal';
+import lernernLogo from '@/assets/lernern_logo.jpeg';
 
 export function AuthLayout() {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -12,13 +13,13 @@ export function AuthLayout() {
       <div className={`container relative w-full max-w-4xl min-h-[600px] rounded-lg shadow-lg overflow-hidden ${isSignUp ? 'right-panel-active' : ''}`}>
         <div className="form-container sign-up-container absolute top-0 h-full left-0 w-1/2 opacity-0">
           <div className="flex flex-col items-center pt-4 bg-white">
-            <img src="/lernern_logo.jpeg" alt="Lernern Logo" className="h-24 w-auto mb-2" />
+            <img src={lernernLogo} alt="Lernern Logo" className="h-24 w-auto mb-2" />
           </div>
           <SignupForm />
         </div>
         <div className="form-container sign-in-container absolute top-0 h-full left-0 w-1/2">
           <div className="flex flex-col items-center pt-4 bg-white">
-            <img src="/lernern_logo.jpeg" alt="Lernern Logo" className="h-24 w-auto mb-2" />
+            <img src={lernernLogo} alt="Lernern Logo" className="h-24 w-auto mb-2" />
           </div>
           <LoginForm />
         </div>
