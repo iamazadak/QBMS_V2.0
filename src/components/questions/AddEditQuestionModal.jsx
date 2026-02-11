@@ -10,12 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Card } from "@/components/ui/card";
-import { FileText, CheckCircle2, AlertCircle, Sparkles } from "lucide-react";
+import { FileText, CheckCircle2, AlertCircle, Sparkles, X } from "lucide-react";
 
-import { Program, Course, Subject, Question, Option } from "@/entities/all";
+import { Program, Course, Subject, Competency, Question, Option } from "@/entities/all";
 import { useToast } from "@/components/ui/use-toast";
 
 export default function AddEditQuestionModal({
@@ -30,9 +30,11 @@ export default function AddEditQuestionModal({
   const programEntity = new Program();
   const courseEntity = new Course();
   const subjectEntity = new Subject();
+  const competencyEntity = new Competency();
   const questionEntity = new Question();
   const optionEntity = new Option();
 
+  // --- State ---
   const [formData, setFormData] = useState({
     question_text: "",
     subject_id: "",
@@ -41,7 +43,8 @@ export default function AddEditQuestionModal({
     explanation: "",
     year: "",
     program_id: "",
-    course_id: ""
+    course_id: "",
+    competency_id: ""
   });
 
   const [options, setOptions] = useState([
@@ -51,58 +54,19 @@ export default function AddEditQuestionModal({
     { option_label: "D", option_text: "", is_correct: false }
   ]);
 
+  const [tags, setTags] = useState([]);
+  const [tagInput, setTagInput] = useState("");
   const [correctAnswer, setCorrectAnswer] = useState("A");
   const [programs, setPrograms] = useState([]);
   const [courses, setCourses] = useState([]);
   const [subjects, setSubjects] = useState([]);
+  const [competencies, setCompetencies] = useState([]);
   const [allYears, setAllYears] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  const loadPrograms = async () => {
-    const data = await programEntity.list();
-    setPrograms(data);
-  };
-
-  const loadCourses = async () => {
-    const data = await courseEntity.list();
-    setCourses(data);
-  };
-
-  const loadSubjects = async () => {
-    const data = await subjectEntity.list();
-    setSubjects(data);
-  };
-
-  const loadAllYears = async () => {
-    try {
-      const data = await subjectEntity.getUniqueValues('year');
-      let years = data ? data.map(String) : [];
-
-      if (question && (question.year || question.subject?.year)) {
-        const questionYear = String(question.subject?.year || question.year);
-        if (!years.includes(questionYear)) {
-          years.push(questionYear);
-        }
-      }
-
-      years = years.sort((a, b) => b.localeCompare(a));
-
-      if (!years.length) {
-        years = [String(new Date().getFullYear())];
-      }
-
-      setAllYears(years);
-    } catch (error) {
-      console.error("Error loading years:", error);
-      const defaultYear = question && (question.year || question.subject?.year)
-        ? String(question.subject?.year || question.year)
-        : String(new Date().getFullYear());
-      setAllYears([defaultYear]);
-    }
-  };
-
-  const resetForm = () => {
+  // --- Initializers ---
+  const resetForm = useCallback(() => {
     setFormData({
       question_text: "",
       subject_id: "",
@@ -111,57 +75,107 @@ export default function AddEditQuestionModal({
       explanation: "",
       year: "",
       program_id: "",
-      course_id: ""
+      course_id: "",
+      competency_id: ""
     });
-
     setOptions([
       { option_label: "A", option_text: "", is_correct: false },
       { option_label: "B", option_text: "", is_correct: false },
       { option_label: "C", option_text: "", is_correct: false },
       { option_label: "D", option_text: "", is_correct: false }
     ]);
-
+    setTags([]);
+    setTagInput("");
     setCorrectAnswer("A");
     setErrors({});
-  };
+  }, []);
 
   const populateEditData = useCallback(() => {
-    if (question) {
-      const yearValue = question.subject?.year || question.year || "";
-      setFormData({
-        question_text: question.question_text || "",
-        subject_id: question.subject_id || "",
-        level: question.level || "medium",
-        positive_marks: question.positive_marks || 1,
-        explanation: question.explanation || "",
-        year: String(yearValue),
-        program_id: question.program_id || "",
-        course_id: question.course_id || ""
-      });
+    if (!question) return;
 
-      if (question.options && question.options.length > 0) {
-        setOptions(question.options);
-        const correct = question.options.find(opt => opt.is_correct);
-        if (correct) {
-          setCorrectAnswer(correct.option_label);
-        }
+    console.log("Populating edit data for question:", question.id);
+    const yearValue = question.subject?.year || question.year || "";
+
+    setFormData({
+      question_text: question.question_text || "",
+      subject_id: question.subject_id || "",
+      level: question.level || "medium",
+      positive_marks: question.positive_marks || 1,
+      explanation: question.solution_explanation || question.explanation || "",
+      year: String(yearValue),
+      program_id: question.program?.id || question.program_id || "",
+      course_id: question.course?.id || question.course_id || "",
+      competency_id: question.competency?.id || question.competency_id || ""
+    });
+
+    setTags(question.tags?.map(t => t.name) || []);
+
+    if (question.options && question.options.length > 0) {
+      // Sort options by label to ensure consistent A, B, C, D order
+      const sortedOptions = [...question.options].sort((a, b) =>
+        (a.option_label || "").localeCompare(b.option_label || "")
+      );
+      setOptions(sortedOptions);
+      const correct = sortedOptions.find(opt => opt.is_correct);
+      if (correct) {
+        setCorrectAnswer(correct.option_label);
       }
     }
   }, [question]);
 
+  // --- Data Loading ---
+  const loadData = async () => {
+    try {
+      const [pData, cData, sData, cpData] = await Promise.all([
+        programEntity.list(),
+        courseEntity.list(),
+        subjectEntity.list(),
+        competencyEntity.list()
+      ]);
+      setPrograms(pData || []);
+      setCourses(cData || []);
+      setSubjects(sData || []);
+      setCompetencies(cpData || []);
+
+      // Extract unique years
+      const uniqueYears = [...new Set(sData.map(s => String(s.year)).filter(Boolean))];
+      if (uniqueYears.length === 0) {
+        uniqueYears.push(String(new Date().getFullYear()));
+      }
+      setAllYears(uniqueYears.sort((a, b) => b - a));
+
+    } catch (error) {
+      console.error("Error loading modal data:", error);
+      toast({ variant: "destructive", description: "Failed to load categorization data." });
+    }
+  };
+
   useEffect(() => {
     if (isOpen) {
-      loadPrograms();
-      loadCourses();
-      loadSubjects();
-      loadAllYears();
+      console.log("AddEditQuestionModal Opened. Mode:", question ? "Edit" : "Create");
+      loadData();
       if (question) {
         populateEditData();
       } else {
         resetForm();
       }
     }
-  }, [isOpen, question, populateEditData]);
+  }, [isOpen, question, populateEditData, resetForm]);
+
+  // --- Handlers ---
+  const handleAddTag = (e) => {
+    if (e.key === "Enter" && tagInput.trim()) {
+      e.preventDefault();
+      if (!tags.includes(tagInput.trim())) {
+        setTags([...tags, tagInput.trim()]);
+      }
+      setTagInput("");
+    }
+  };
+
+  const handleRemoveTag = (tagName) => {
+    setTags(tags.filter(t => t !== tagName));
+  };
 
   const handleOptionChange = (index, text) => {
     const newOptions = [...options];
@@ -171,14 +185,13 @@ export default function AddEditQuestionModal({
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.question_text) newErrors.question_text = "Required";
-    if (!formData.subject_id) newErrors.subject_id = "Required";
+    if (!formData.question_text.trim()) newErrors.question_text = "Required";
     if (!formData.program_id) newErrors.program_id = "Required";
     if (!formData.course_id) newErrors.course_id = "Required";
+    if (!formData.subject_id) newErrors.subject_id = "Required";
     if (!formData.year) newErrors.year = "Required";
-    if (!formData.level) newErrors.level = "Required";
-    if (!formData.positive_marks) newErrors.positive_marks = "Required";
-    if (!options.every(opt => opt.option_text)) newErrors.options = "All options required";
+    if (options.some(opt => !opt.option_text.trim())) newErrors.options = "All options required";
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -190,302 +203,363 @@ export default function AddEditQuestionModal({
     }
 
     setIsLoading(true);
+    console.log("Saving question...");
 
     try {
+      // 1. Prepare data for the 'questions' table
+      const { year, program_id, course_id, explanation, ...baseData } = formData;
+      const dbData = {
+        ...baseData,
+        solution_explanation: explanation,
+        positive_marks: parseFloat(baseData.positive_marks) || 1
+      };
+
+      let questionId = question?.id;
+
+      if (question) {
+        await questionEntity.update(questionId, dbData);
+      } else {
+        const newQuestion = await questionEntity.create(dbData);
+        questionId = newQuestion.id;
+      }
+
+      // 1b. Sync Tags
+      await questionEntity.syncTags(questionId, tags);
+
+      // 2. Handle Options
       const updatedOptions = options.map(opt => ({
         ...opt,
+        question_id: questionId,
         is_correct: opt.option_label === correctAnswer
       }));
 
       if (question) {
-        await questionEntity.update(question.id, formData);
-
-        const existingOptionIds = new Set(question.options.map(o => o.id));
-        const currentOptionIds = new Set(updatedOptions.map(o => o.id).filter(Boolean));
-
-        for (const existingOption of question.options) {
-          if (!currentOptionIds.has(existingOption.id)) {
-            await optionEntity.delete(existingOption.id);
-          }
-        }
-
-        for (const option of updatedOptions) {
-          if (option.id && existingOptionIds.has(option.id)) {
-            await optionEntity.update(option.id, {
-              option_text: option.option_text,
-              is_correct: option.is_correct,
-              question_id: question.id
+        // Update existing options
+        for (const opt of updatedOptions) {
+          if (opt.id) {
+            await optionEntity.update(opt.id, {
+              option_text: opt.option_text,
+              is_correct: opt.is_correct
             });
           } else {
-            await optionEntity.create({
-              ...option,
-              question_id: question.id
-            });
+            await optionEntity.create(opt);
           }
         }
       } else {
-        const newQuestion = await questionEntity.create(formData);
-        for (const option of updatedOptions) {
-          await optionEntity.create({
-            ...option,
-            question_id: newQuestion.id
-          });
+        // Create new options
+        for (const opt of updatedOptions) {
+          const { id, ...newOpt } = opt;
+          await optionEntity.create(newOpt);
         }
       }
 
+      console.log("Question saved successfully!");
       onSave();
       onClose();
     } catch (error) {
       console.error("Error saving question:", error);
-      toast({ variant: "destructive", description: "Error saving question. Please try again." });
+      toast({
+        variant: "destructive",
+        description: `Error: ${error.message || "Failed to save question"}`
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
+  // --- Computed ---
+  const filteredCourses = courses.filter(c => !formData.program_id || c.program_id === formData.program_id);
+  const filteredSubjects = subjects.filter(s => !formData.course_id || s.course_id === formData.course_id);
+  const filteredCompetencies = competencies.filter(c => !formData.subject_id || c.subject_id === formData.subject_id);
+
+  console.log("AddEditQuestionModal Render - isOpen:", isOpen);
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-full max-w-6xl p-0 gap-0 bg-white rounded-xl overflow-hidden shadow-2xl border-0">
+      <DialogContent className="max-w-4xl p-0 overflow-hidden bg-white border-none shadow-2xl z-[5001]">
+        {/* Transparent high z-index overlay logic is handled by Radix Dialog */}
 
         {/* Header */}
-        <DialogHeader className="px-6 py-4 bg-gradient-to-r from-teal-600 to-teal-700 text-white flex flex-row items-center justify-between shrink-0">
+        <DialogHeader className="px-6 py-4 bg-slate-900 text-white flex flex-row items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-              <FileText className="w-5 h-5 text-indigo-50" />
+            <div className="p-2 bg-indigo-500 rounded-lg">
+              <FileText className="w-5 h-5 text-white" />
             </div>
             <div>
-              <DialogTitle className="text-lg font-semibold text-white tracking-tight">
-                {question ? "Edit Question" : "Create New Question"}
+              <DialogTitle className="text-xl font-bold text-white">
+                {question ? "Edit Question" : "Add New Question"}
               </DialogTitle>
-              <p className="text-indigo-100/70 text-xs font-medium">Step 1 of 1: Enter Details</p>
+              <p className="text-slate-400 text-xs font-medium uppercase tracking-widest mt-0.5">
+                Questions Bank Management
+              </p>
             </div>
           </div>
+          <Button variant="ghost" size="icon" onClick={onClose} className="text-slate-400 hover:text-white hover:bg-slate-800 rounded-xl">
+            <X className="w-5 h-5" />
+          </Button>
         </DialogHeader>
 
-        {/* Scrollable Content */}
-        <div className="px-8 py-6 max-h-[75vh] overflow-y-auto custom-scrollbar bg-slate-50/50">
-          <div className="space-y-8">
+        {/* Form Body */}
+        <div className="p-6 md:p-8 max-h-[80vh] overflow-y-auto bg-slate-50/50">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-            {/* Question Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold ring-4 ring-indigo-50">1</span>
-                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Question Details</h3>
-              </div>
-
-              <div className="grid grid-cols-1 gap-6 bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm">
-                <div className="space-y-2">
-                  <Label htmlFor="question_text" className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Question Text <span className="text-red-500">*</span></Label>
-                  <Textarea
-                    id="question_text"
-                    placeholder="Type your question here..."
-                    value={formData.question_text}
-                    onChange={(e) => setFormData({ ...formData, question_text: e.target.value })}
-                    className={`min-h-[120px] text-base resize-none bg-slate-50 border-slate-200 focus:bg-white transition-all duration-200 ${errors.question_text ? 'border-red-500 focus:ring-red-200' : 'focus:border-indigo-500 focus:ring-indigo-100'}`}
-                    disabled={isViewMode}
-                  />
-                  {errors.question_text && <p className="text-red-500 text-xs flex items-center gap-1"><AlertCircle className="w-3 h-3" />Required</p>}
+            {/* Left Column: Question Details */}
+            <div className="lg:col-span-7 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-6 bg-indigo-500 rounded-full"></div>
+                  <h3 className="font-bold text-slate-800">Content</h3>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
                   <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Difficulty Level <span className="text-red-500">*</span></Label>
-                    <Select value={formData.level} onValueChange={(value) => setFormData({ ...formData, level: value })} disabled={isViewMode}>
-                      <SelectTrigger className="h-11 bg-slate-50 border-slate-200 focus:ring-indigo-100">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white z-[9999] shadow-xl border-slate-200">
-                        <SelectItem value="easy" className="text-green-600 font-medium">Easy</SelectItem>
-                        <SelectItem value="medium" className="text-amber-600 font-medium">Medium</SelectItem>
-                        <SelectItem value="hard" className="text-red-600 font-medium">Hard</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="question_text" className="text-xs font-bold text-slate-500 uppercase">Question Text *</Label>
+                    <Textarea
+                      id="question_text"
+                      placeholder="Enter the question text here..."
+                      value={formData.question_text}
+                      onChange={(e) => setFormData(prev => ({ ...prev, question_text: e.target.value }))}
+                      className={`min-h-[120px] resize-none focus:ring-2 focus:ring-indigo-100 ${errors.question_text ? "border-red-500" : "border-slate-200"}`}
+                      disabled={isViewMode}
+                    />
+                    {errors.question_text && <span className="text-red-500 text-[10px] uppercase font-bold flex items-center gap-1 mt-1"><AlertCircle className="w-3 h-3" /> {errors.question_text}</span>}
                   </div>
 
-                  <div className="space-y-2">
-                    <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Marks <span className="text-red-500">*</span></Label>
-                    <div className="relative">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold text-slate-500 uppercase">Difficulty *</Label>
+                      <Select
+                        value={formData.level}
+                        onValueChange={(v) => setFormData(p => ({ ...p, level: v }))}
+                        disabled={isViewMode}
+                      >
+                        <SelectTrigger className="bg-slate-50">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-white z-[6000]">
+                          <SelectItem value="easy">Easy</SelectItem>
+                          <SelectItem value="medium">Medium</SelectItem>
+                          <SelectItem value="hard">Hard</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold text-slate-500 uppercase">Marks *</Label>
                       <Input
                         type="number"
-                        min="0.5"
-                        step="0.5"
+                        min="1"
                         value={formData.positive_marks}
-                        onChange={(e) => setFormData({ ...formData, positive_marks: parseFloat(e.target.value) })}
-                        className="h-11 pl-4 bg-slate-50 border-slate-200 focus:ring-indigo-100 focus:bg-white transition-all"
+                        onChange={(e) => setFormData(p => ({ ...p, positive_marks: e.target.value }))}
+                        className="bg-slate-50"
                         disabled={isViewMode}
                       />
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">pts</div>
                     </div>
                   </div>
                 </div>
               </div>
+
+              {/* Options */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-6 bg-emerald-500 rounded-full"></div>
+                  <h3 className="font-bold text-slate-800">Answers</h3>
+                </div>
+
+                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-3">
+                  <RadioGroup value={correctAnswer} onValueChange={setCorrectAnswer} disabled={isViewMode}>
+                    {options.map((opt, idx) => (
+                      <div key={idx} className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${correctAnswer === opt.option_label ? "border-emerald-500 bg-emerald-50/50" : "border-slate-100 hover:border-slate-200"}`}>
+                        <RadioGroupItem value={opt.option_label} id={`opt-${idx}`} className="border-slate-300 text-emerald-600" />
+                        <span className="font-bold text-slate-400 w-4">{opt.option_label}</span>
+                        <Input
+                          placeholder={`Option ${opt.option_label}...`}
+                          value={opt.option_text}
+                          onChange={(e) => handleOptionChange(idx, e.target.value)}
+                          className="border-none bg-transparent shadow-none focus-visible:ring-0 p-0 h-auto text-sm"
+                          disabled={isViewMode}
+                        />
+                        {correctAnswer === opt.option_label && (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        )}
+                      </div>
+                    ))}
+                  </RadioGroup>
+                  {errors.options && <span className="text-red-500 text-[10px] uppercase font-bold block mt-2">{errors.options}</span>}
+                </div>
+              </div>
             </div>
 
-            {/* Options Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold ring-4 ring-indigo-50">2</span>
-                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Answer Options</h3>
+            {/* Right Column: Categorization & Explanation */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-6 bg-amber-500 rounded-full"></div>
+                  <h3 className="font-bold text-slate-800">Categorization</h3>
+                </div>
+
+                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-slate-500 uppercase">Program *</Label>
+                    <Select
+                      value={formData.program_id}
+                      onValueChange={(v) => setFormData(p => ({ ...p, program_id: v, course_id: "", subject_id: "" }))}
+                      disabled={isViewMode}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Program" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white z-[6000]">
+                        {programs.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-slate-500 uppercase">Course *</Label>
+                    <Select
+                      value={formData.course_id}
+                      onValueChange={(v) => setFormData(p => ({ ...p, course_id: v, subject_id: "" }))}
+                      disabled={isViewMode || !formData.program_id}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={!formData.program_id ? "Select Program first" : "Select Course"} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white z-[6000]">
+                        {filteredCourses.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-slate-500 uppercase">Subject *</Label>
+                    <Select
+                      value={formData.subject_id}
+                      onValueChange={(v) => setFormData(p => ({ ...p, subject_id: v, competency_id: "" }))}
+                      disabled={isViewMode || !formData.course_id}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={!formData.course_id ? "Select Course first" : "Select Subject"} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white z-[6000]">
+                        {filteredSubjects.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-slate-500 uppercase">Competency</Label>
+                    <Select
+                      value={formData.competency_id}
+                      onValueChange={(v) => setFormData(p => ({ ...p, competency_id: v }))}
+                      disabled={isViewMode || !formData.subject_id}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder={!formData.subject_id ? "Select Subject first" : "Select Competency"} />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white z-[6000]">
+                        {filteredCompetencies.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-slate-500 uppercase">Year *</Label>
+                    <Select
+                      value={formData.year}
+                      onValueChange={(v) => setFormData(p => ({ ...p, year: v }))}
+                      disabled={isViewMode}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select Year" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-white z-[6000]">
+                        {allYears.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
 
-              <div className="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm space-y-4">
-                <RadioGroup value={correctAnswer} onValueChange={setCorrectAnswer} className="space-y-3">
-                  {options.map((option, index) => (
-                    <div
-                      key={index}
-                      className={`group flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 ${correctAnswer === option.option_label
-                        ? 'border-indigo-500 bg-indigo-50/30 ring-1 ring-indigo-500/20'
-                        : 'border-slate-200 hover:border-teal-200 hover:bg-slate-50'
-                        }`}
-                    >
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-lg shrink-0 text-sm font-bold transition-colors ${correctAnswer === option.option_label ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-500 group-hover:bg-white group-hover:text-teal-600 group-hover:shadow-sm'
-                        }`}>
-                        {option.option_label}
-                      </div>
-
-                      <Input
-                        placeholder={`Type answer for Option ${option.option_label}`}
-                        value={option.option_text}
-                        onChange={(e) => handleOptionChange(index, e.target.value)}
-                        className="h-10 border-0 bg-transparent focus-visible:ring-0 px-2 shadow-none text-sm font-medium text-slate-700 placeholder:text-slate-400"
-                        disabled={isViewMode}
-                      />
-
-                      <div className="flex items-center shrink-0">
-                        <RadioGroupItem value={option.option_label} id={`option-${index}`} className="sr-only" disabled={isViewMode} />
-                        <Label
-                          htmlFor={`option-${index}`}
-                          className={`cursor-pointer px-3 py-1.5 rounded-md text-xs font-semibold transition-all select-none ${correctAnswer === option.option_label
-                            ? 'bg-green-100 text-green-700 hover:bg-green-200'
-                            : 'bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-600'
-                            }`}
-                        >
-                          {correctAnswer === option.option_label ? (
-                            <span className="flex items-center gap-1"><CheckCircle2 className="w-3 h-3" /> Correct Answer</span>
-                          ) : (
-                            "Mark Correct"
-                          )}
-                        </Label>
-                      </div>
-                    </div>
-                  ))}
-                </RadioGroup>
-
-                {errors.options && <p className="text-red-500 text-center text-xs py-2 bg-red-50 rounded-lg">{errors.options}</p>}
-
-                {/* Explanation */}
-                <div className="pt-4 border-t border-slate-100 mt-4">
-                  <Label htmlFor="explanation" className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 block flex items-center gap-2">
-                    <Sparkles className="w-3 h-3 text-amber-500" /> Explanation (Optional)
-                  </Label>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-6 bg-indigo-500 rounded-full"></div>
+                  <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                    Explanation <Sparkles className="w-4 h-4 text-indigo-500" />
+                  </h3>
+                </div>
+                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
                   <Textarea
-                    id="explanation"
-                    placeholder="Explain why the correct answer is correct..."
+                    placeholder="Provide a detailed explanation for the correct answer..."
                     value={formData.explanation}
-                    onChange={(e) => setFormData({ ...formData, explanation: e.target.value })}
-                    className="min-h-[100px] bg-amber-50/30 border-amber-100 focus:bg-white focus:border-amber-300 focus:ring-amber-100 text-sm"
+                    onChange={(e) => setFormData(p => ({ ...p, explanation: e.target.value }))}
+                    className="min-h-[100px] resize-none border-slate-100 bg-slate-50/50 focus:bg-white"
                     disabled={isViewMode}
                   />
                 </div>
               </div>
-            </div>
 
-            {/* Categorization Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-indigo-100 text-indigo-700 text-xs font-bold ring-4 ring-indigo-50">3</span>
-                <h3 className="text-sm font-bold text-slate-800 uppercase tracking-wide">Categorization</h3>
-              </div>
-
-              <div className="bg-white p-5 rounded-xl border border-slate-200/60 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-5">
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Program <span className="text-red-500">*</span></Label>
-                  <Select value={formData.program_id} onValueChange={(value) => setFormData({ ...formData, program_id: value })} disabled={isViewMode}>
-                    <SelectTrigger className="h-11 bg-slate-50 border-slate-200 focus:ring-indigo-100">
-                      <SelectValue placeholder="Select Program" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white z-[9999] shadow-xl border-slate-200">
-                      {programs.map((program) => (
-                        <SelectItem key={program.id} value={program.id}>{program.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+              {/* Tags Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-6 bg-slate-400 rounded-full"></div>
+                  <h3 className="font-bold text-slate-800">Tags & Competencies</h3>
                 </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Course <span className="text-red-500">*</span></Label>
-                  <Select value={formData.course_id} onValueChange={(value) => setFormData({ ...formData, course_id: value })} disabled={isViewMode}>
-                    <SelectTrigger className="h-11 bg-slate-50 border-slate-200 focus:ring-indigo-100">
-                      <SelectValue placeholder="Select Course" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white z-[9999] shadow-xl border-slate-200">
-                      {courses.map((course) => (
-                        <SelectItem key={course.id} value={course.id}>{course.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Subject <span className="text-red-500">*</span></Label>
-                  <Select value={formData.subject_id} onValueChange={(value) => setFormData({ ...formData, subject_id: value })} disabled={isViewMode}>
-                    <SelectTrigger className="h-11 bg-slate-50 border-slate-200 focus:ring-indigo-100">
-                      <SelectValue placeholder="Select Subject" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white z-[9999] shadow-xl border-slate-200">
-                      {subjects.map((subject) => (
-                        <SelectItem key={subject.id} value={subject.id}>{subject.name}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Year <span className="text-red-500">*</span></Label>
-                  {isViewMode ? (
-                    <div className="h-11 flex items-center px-4 bg-slate-50 border border-slate-200 rounded-md text-sm text-slate-700">
-                      {formData.year || "Not specified"}
-                    </div>
-                  ) : (
-                    <Select value={formData.year} onValueChange={(value) => setFormData({ ...formData, year: value })} disabled={isViewMode}>
-                      <SelectTrigger className="h-11 bg-slate-50 border-slate-200 focus:ring-indigo-100">
-                        <SelectValue placeholder="Select Year" />
-                      </SelectTrigger>
-                      <SelectContent className="max-h-[200px] bg-white z-[9999] shadow-xl border-slate-200">
-                        {allYears.length > 0 ? (
-                          allYears.map((year) => (
-                            <SelectItem key={year} value={year}>{year}</SelectItem>
-                          ))
-                        ) : (
-                          <SelectItem value="" disabled>No years available</SelectItem>
-                        )}
-                      </SelectContent>
-                    </Select>
-                  )}
+                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Add Tags (Press Enter)</Label>
+                    <Input
+                      placeholder="e.g. Algebra, NEET 2025, Competency-A..."
+                      value={tagInput}
+                      onChange={(e) => setTagInput(e.target.value)}
+                      onKeyDown={handleAddTag}
+                      className="bg-slate-50 border-slate-200 h-10 focus:ring-2 focus:ring-slate-100"
+                      disabled={isViewMode}
+                    />
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {tags.length === 0 ? (
+                      <p className="text-[11px] text-slate-400 italic">No tags added yet.</p>
+                    ) : (
+                      tags.map(tag => (
+                        <Badge
+                          key={tag}
+                          className="bg-teal-500 hover:bg-teal-600 text-white flex items-center gap-1.5 py-1 px-3 rounded-full text-xs transition-all animate-in zoom-in-95"
+                        >
+                          {tag}
+                          {!isViewMode && (
+                            <X
+                              className="w-3 h-3 cursor-pointer hover:text-rose-400 transition-colors"
+                              onClick={() => handleRemoveTag(tag)}
+                            />
+                          )}
+                        </Badge>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
-
           </div>
         </div>
 
         {/* Footer */}
-        <DialogFooter className="px-6 py-4 border-t border-slate-100 bg-white flex justify-end gap-3 shrink-0">
-          <Button type="button" variant="outline" onClick={onClose} className="h-10 px-6 border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-red-600 transition-colors">
-            {isViewMode ? "Close" : "Cancel"}
-          </Button>
-          {!isViewMode && (
-            <Button type="button" onClick={handleSubmit} disabled={isLoading} className="h-10 px-6 bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-200 transition-all hover:scale-105">
-              {isLoading ? (
-                <span className="flex items-center gap-2">
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                  Saving...
-                </span>
-              ) : (
-                question ? "Update Question" : "Create Question"
-              )}
+        <DialogFooter className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-row items-center justify-between gap-3 shrink-0">
+          <p className="text-[10px] text-slate-400 font-bold uppercase hidden md:block">Fields marked with * are mandatory</p>
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            <Button variant="ghost" onClick={onClose} disabled={isLoading} className="flex-1 md:flex-none">
+              Cancel
             </Button>
-          )}
+            {!isViewMode && (
+              <Button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                variant="primary"
+                className="flex-1 md:flex-none min-w-[140px]"
+              >
+                {isLoading ? "Saving..." : question ? "Update Question" : "Create Question"}
+              </Button>
+            )}
+          </div>
         </DialogFooter>
       </DialogContent>
     </Dialog>

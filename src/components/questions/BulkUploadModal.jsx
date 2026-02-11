@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Upload, Download, FileText, CheckCircle, XCircle } from "lucide-react";
-import { Program, Course, Subject, Question, Option } from "@/entities/all";
+import { Program, Course, Subject, Competency, Question, Option } from "@/entities/all";
 import { useToast } from "@/components/ui/use-toast";
 
 
@@ -20,6 +20,7 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
   const programEntity = new Program();
   const courseEntity = new Course();
   const subjectEntity = new Subject();
+  const competencyEntity = new Competency();
   const questionEntity = new Question();
   const optionEntity = new Option();
 
@@ -41,7 +42,7 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
 
   const downloadTemplate = () => {
     const headers = [
-      "program_name", "course_name", "subject_name", "subject_year",
+      "program_name", "course_name", "subject_name", "subject_year", "competency_name",
       "question_text", "level", "positive_marks", "explanation",
       "option_a_text", "option_b_text", "option_c_text", "option_d_text",
       "correct_option_label"
@@ -84,8 +85,7 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
       setUploadStatus(currentStatus);
 
 
-      const cache = { programs: new Map(), courses: new Map(), subjects: new Map() };
-
+      const cache = { programs: new Map(), courses: new Map(), subjects: new Map(), competencies: new Map() };
 
       for (let i = 0; i < rows.length; i++) {
         const row = rows[i].split(',');
@@ -138,6 +138,22 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
             cache.subjects.set(subjectKey, subjectId);
           }
 
+          // 3b. Competency
+          let competencyId = null;
+          if (rowData.competency_name) {
+            const competencyKey = `${subjectId}_${rowData.competency_name}`;
+            competencyId = cache.competencies.get(competencyKey);
+            if (!competencyId) {
+              const existingComp = await competencyEntity.filter({ name: rowData.competency_name, subject_id: subjectId });
+              if (existingComp.length > 0) {
+                competencyId = existingComp[0].id;
+              } else {
+                const newComp = await competencyEntity.create({ name: rowData.competency_name, subject_id: subjectId });
+                competencyId = newComp.id;
+              }
+              cache.competencies.set(competencyKey, competencyId);
+            }
+          }
 
           // 4. Question
           let processedLevel = (rowData.level || 'medium').toLowerCase().trim();
@@ -149,11 +165,11 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
           const newQuestion = await questionEntity.create({
             question_text: rowData.question_text,
             subject_id: subjectId,
+            competency_id: competencyId,
             level: processedLevel,
             positive_marks: parseFloat(rowData.positive_marks) || 1,
             solution_explanation: rowData.explanation,
           });
-
 
           // 5. Options
           const options = [
@@ -232,7 +248,7 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
               <h4 className="font-semibold text-blue-800">CSV Template</h4>
               <p className="text-sm text-teal-700">Download this template to ensure your data is correctly formatted for bulk upload.</p>
             </div>
-            <Button variant="outline" onClick={downloadTemplate} className="bg-teal-100 text-teal-700 hover:bg-blue-200">
+            <Button variant="secondary" size="sm" onClick={downloadTemplate}>
               <Download className="w-4 h-4 mr-2" />
               Download Template
             </Button>
@@ -275,7 +291,7 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
                 <div className="flex items-center space-x-2">
                   <FileText className="w-6 h-6 text-teal-500" />
                   <span className="text-sm text-slate-700 font-medium">{file.name}</span>
-                  <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setFile(null); }} disabled={isUploading}>
+                  <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); setFile(null); }} disabled={isUploading} className="rounded-xl">
                     <XCircle className="w-4 h-4 text-red-500" />
                   </Button>
                 </div>
@@ -325,11 +341,11 @@ export default function BulkUploadModal({ isOpen, onClose, onUploadComplete }) {
         </div>
 
 
-        <DialogFooter className="flex justify-center space-x-4">
-          <Button variant="outline" onClick={handleClose} disabled={isUploading} className="text-gray-600 border-gray-300 hover:scale-103 transition-transform hover:text-red-700 transition-all duration-200">
+        <DialogFooter className="flex justify-center flex-row gap-4">
+          <Button variant="outline" onClick={handleClose} disabled={isUploading}>
             {uploadStatus.total > 0 ? "Close" : "Cancel"}
           </Button>
-          <Button onClick={handleUpload} disabled={!file || isUploading} className="hover:scale-103 transition-transform hover:text-green-700">
+          <Button onClick={handleUpload} disabled={!file || isUploading} variant="primary">
             {isUploading ? "Uploading..." : "Upload"}
           </Button>
         </DialogFooter>

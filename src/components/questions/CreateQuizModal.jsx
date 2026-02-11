@@ -40,7 +40,7 @@ import { Exam, ExamQuestion, Program, Course, Subject } from "@/entities/all";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 
-export default function CreateQuizModal({ isOpen, onClose, selectedQuestions, onQuizCreated }) {
+export default function CreateAssessmentModal({ isOpen, onClose, selectedQuestions, onAssessmentCreated }) {
     const { toast } = useToast();
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
@@ -282,8 +282,8 @@ export default function CreateQuizModal({ isOpen, onClose, selectedQuestions, on
                 await examQuestionEntity.create({ exam_id: newExam.id, question_id: question.id });
             }
 
-            toast({ description: "Quiz launched successfully!" });
-            onQuizCreated();
+            toast({ description: "Assessment launched successfully!" });
+            onAssessmentCreated();
             onClose();
         } catch (error) {
             console.error("Error creating quiz:", error);
@@ -357,7 +357,7 @@ export default function CreateQuizModal({ isOpen, onClose, selectedQuestions, on
                                     <div className="space-y-3">
                                         <Label className="text-sm font-bold text-slate-500 uppercase tracking-widest ml-1">Assessment Title <span className="text-red-500">*</span></Label>
                                         <Input
-                                            placeholder="e.g., Weekly Digital Marketing Quiz"
+                                            placeholder="e.g., Weekly Digital Marketing Assessment"
                                             value={formData.title}
                                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                             className="h-16 bg-slate-50 border-2 border-transparent focus:border-[#069494] focus:ring-0 rounded-2xl text-xl font-bold px-6 transition-all"
@@ -425,7 +425,7 @@ export default function CreateQuizModal({ isOpen, onClose, selectedQuestions, on
                                         <div className="p-3 bg-teal-100 rounded-2xl text-[#069494]">
                                             <GraduationCap className="w-6 h-6" />
                                         </div>
-                                        <h3 className="text-2xl font-black text-slate-800 tracking-tight">Assesement specification</h3>
+                                        <h3 className="text-2xl font-black text-slate-800 tracking-tight">Assessment specification</h3>
                                     </div>
                                     <div className="grid grid-cols-2 gap-6">
                                         <div className="space-y-3">

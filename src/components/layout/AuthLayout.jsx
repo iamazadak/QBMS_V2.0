@@ -28,12 +28,12 @@ export function AuthLayout() {
             <div className="overlay-panel overlay-left absolute flex items-center justify-center flex-col px-10 text-center top-0 h-full w-1/2">
               <h1 className="text-white text-2xl font-bold">Welcome Back!</h1>
               <p className="text-white mt-2">Access your account and continue your journey.</p>
-              <button className="ghost mt-4 bg-transparent border border-white text-white py-2 px-8 rounded-full" onClick={() => setIsSignUp(false)}>Sign In</button>
+              <button className="ghost mt-4 bg-transparent border border-white text-white py-2 px-8 rounded-xl font-bold transition-all hover:bg-white/10 active:scale-95" onClick={() => setIsSignUp(false)}>Sign In</button>
             </div>
             <div className="overlay-panel overlay-right absolute flex items-center justify-center flex-col px-10 text-center top-0 h-full w-1/2 right-0">
               <h1 className="text-white text-2xl font-bold">Join Us!</h1>
               <p className="text-white mt-2">Register to unlock full access and exclusive features.</p>
-              <button className="ghost mt-4 bg-transparent border border-white text-white py-2 px-8 rounded-full" onClick={() => setIsSignUp(true)}>Sign Up</button>
+              <button className="ghost mt-4 bg-transparent border border-white text-white py-2 px-8 rounded-xl font-bold transition-all hover:bg-white/10 active:scale-95" onClick={() => setIsSignUp(true)}>Sign Up</button>
             </div>
           </div>
         </div>

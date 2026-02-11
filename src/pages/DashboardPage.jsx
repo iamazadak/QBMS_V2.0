@@ -21,7 +21,9 @@ import {
   Trophy,
   AlertCircle,
   BarChart3,
-  PieChart as PieChartIcon
+  PieChart as PieChartIcon,
+  Zap,
+  PlayCircle
 } from "lucide-react";
 import {
   User,
@@ -448,7 +450,7 @@ export default function DashboardPage({ roleName = "Trainer" }) {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-[1600px] mx-auto">
+      <div className="p-6">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4 text-lg">Loading analytics dashboard...</p>
@@ -465,11 +467,11 @@ export default function DashboardPage({ roleName = "Trainer" }) {
   };
   // ... (inside return)
   return (
-    <div className="p-6 max-w-[1600px] mx-auto">
+    <div className="p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-slate-900 mb-2">{roleName} Dashboard</h1>
-        <p className="text-slate-600 text-lg">
+        <h1>{roleName} Dashboard</h1>
+        <p className="text-description">
           Welcome back! Here's your performance overview.
         </p>
       </div>
@@ -480,147 +482,99 @@ export default function DashboardPage({ roleName = "Trainer" }) {
         <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="assessments">Assessments</TabsTrigger>
-
         </TabsList>
 
 
         {/* OVERVIEW TAB */}
         <TabsContent value="overview" className="space-y-6">
-          {/* Primary KPI Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-4 bg-violet-50 rounded-xl">
-                    <Users className="w-6 h-6 text-violet-600" />
-                  </div>
-                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100">
-                    {getTrendIcon(5)} 5%
-                  </Badge>
+          {/* Stats Ribbons */}
+          <div className="space-y-4 mb-10">
+            {/* Primary Ribbon */}
+            <div className="bg-white rounded-[2rem] border border-slate-100 p-2 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+                <div className="p-3 bg-violet-50 text-violet-600 rounded-2xl">
+                  <Users className="w-5 h-5" />
                 </div>
-                <div className="space-y-1">
-                  <p className="text-slate-500 text-sm font-medium">Total Students</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-3xl font-bold text-slate-900">{stats.totalStudents}</p>
-                    <p className="text-slate-400 text-xs">Active learners</p>
-                  </div>
+                <div>
+                  <p className="text-xl font-black text-slate-900 leading-none">{stats.totalStudents}</p>
+                  <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Students</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-
-            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-4 bg-emerald-50 rounded-xl">
-                    <Trophy className="w-6 h-6 text-emerald-600" />
-                  </div>
-                  <Badge className={`bg-${stats.avgTestScore > 70 ? 'emerald' : 'rose'}-50 text-${stats.avgTestScore > 70 ? 'emerald' : 'rose'}-700 border-${stats.avgTestScore > 70 ? 'emerald' : 'rose'}-100`}>
-                    {getTrendIcon(stats.avgTestScore > 70 ? 2 : -1)}
-                    {stats.avgTestScore > 70 ? '+2%' : '-1%'}
-                  </Badge>
+              <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+                  <Trophy className="w-5 h-5" />
                 </div>
-                <div className="space-y-1">
-                  <p className="text-slate-500 text-sm font-medium">Avg Performance</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-3xl font-bold text-slate-900">{stats.avgTestScore}%</p>
-                    <p className="text-slate-400 text-xs">Across all tests</p>
-                  </div>
+                <div>
+                  <p className="text-xl font-black text-slate-900 leading-none">{stats.avgTestScore}%</p>
+                  <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Avg Performance</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-
-            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-4 bg-amber-50 rounded-xl">
-                    <FileText className="w-6 h-6 text-amber-600" />
-                  </div>
-                  <Badge className="bg-amber-50 text-amber-700 border-amber-100 hover:bg-amber-100">
-                    {getTrendIcon(3)} 3%
-                  </Badge>
+              <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+                <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+                  <FileText className="w-5 h-5" />
                 </div>
-                <div className="space-y-1">
-                  <p className="text-slate-500 text-sm font-medium">Total Assessments</p>
-                  <div className="flex items-baseline gap-2">
-                    <p className="text-3xl font-bold text-slate-900">{stats.totalTests}</p>
-                    <p className="text-slate-400 text-xs">{stats.activeTests} active</p>
-                  </div>
+                <div>
+                  <p className="text-xl font-black text-slate-900 leading-none">{stats.totalTests}</p>
+                  <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Assessments</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
 
-
-          </div>
-
-
-          {/* Secondary Stats Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-
-
-
-            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-emerald-50 rounded-lg">
-                    <CheckCircle className="w-5 h-5 text-emerald-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.completedTests}</p>
-                    <p className="text-xs text-slate-500 font-medium">Completed</p>
-                  </div>
+              <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+                <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl relative">
+                  <Video className="w-5 h-5" />
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-white animate-pulse"></div>
                 </div>
-              </CardContent>
-            </Card>
-
-
-            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-violet-50 rounded-lg">
-                    <Target className="w-5 h-5 text-violet-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.totalQuestions}</p>
-                    <p className="text-xs text-slate-500 font-medium">Questions</p>
-                  </div>
+                <div>
+                  <p className="text-xl font-black text-slate-900 leading-none">{stats.liveSessions}</p>
+                  <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Live Sessions</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-
-
-
-
-            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-amber-50 rounded-lg">
-                    <Trophy className="w-5 h-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.topPerformers}</p>
-                    <p className="text-xs text-slate-500 font-medium">Top (80%+)</p>
-                  </div>
+            {/* Secondary Ribbon */}
+            <div className="bg-slate-50/50 rounded-[2rem] border border-slate-100 p-1.5 flex items-center overflow-x-auto no-scrollbar">
+              <div className="flex items-center gap-3 px-6 py-2 border-r border-slate-200 min-w-max">
+                <div className="p-2 bg-white text-emerald-600 rounded-xl shadow-sm">
+                  <CheckCircle className="w-4 h-4" />
                 </div>
-              </CardContent>
-            </Card>
-
-
-            <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-              <CardContent className="p-4">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-red-100 rounded-lg">
-                    <AlertCircle className="w-5 h-5 text-red-600" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold text-slate-900">{stats.lowPerformers}</p>
-                    <p className="text-xs text-slate-600">Need Help</p>
-                  </div>
+                <div>
+                  <p className="text-lg font-black text-slate-900 leading-none">{stats.completedTests}</p>
+                  <p className="text-subscript uppercase tracking-[0.05em] mt-1">Completed</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+
+              <div className="flex items-center gap-3 px-6 py-2 border-r border-slate-200 min-w-max">
+                <div className="p-2 bg-white text-violet-600 rounded-xl shadow-sm">
+                  <Target className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-lg font-black text-slate-900 leading-none">{stats.totalQuestions}</p>
+                  <p className="text-subscript uppercase tracking-[0.05em] mt-1">Questions</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 px-6 py-2 border-r border-slate-200 min-w-max">
+                <div className="p-2 bg-white text-amber-600 rounded-xl shadow-sm">
+                  <Trophy className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-lg font-black text-slate-900 leading-none">{stats.topPerformers}</p>
+                  <p className="text-subscript uppercase tracking-[0.05em] mt-1">Top Tier</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 px-6 py-2 min-w-max">
+                <div className="p-2 bg-white text-rose-600 rounded-xl shadow-sm">
+                  <AlertCircle className="w-4 h-4" />
+                </div>
+                <div>
+                  <p className="text-lg font-black text-slate-900 leading-none">{stats.lowPerformers}</p>
+                  <p className="text-subscript uppercase tracking-[0.05em] mt-1">At Risk</p>
+                </div>
+              </div>
+            </div>
           </div>
 
 
@@ -642,7 +596,7 @@ export default function DashboardPage({ roleName = "Trainer" }) {
                     contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '8px' }}
                   />
                   <Legend />
-                  <Bar dataKey="tests" fill="#3b82f6" name="Tests Attempted" radius={[8, 8, 0, 0]} />
+                  <Bar dataKey="tests" fill="#3b82f6" name="Assessments Attempted" radius={[8, 8, 0, 0]} />
                   <Bar dataKey="sessions" fill="#10b981" name="Sessions Held" radius={[8, 8, 0, 0]} />
                   <Line type="monotone" dataKey="students" stroke="#f59e0b" strokeWidth={2} name="Active Students" />
                 </ComposedChart>
@@ -717,41 +671,47 @@ export default function DashboardPage({ roleName = "Trainer" }) {
         {/* ASSESSMENTS TAB */}
         <TabsContent value="assessments" className="space-y-6">
           {/* Assessment Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="bg-blue-50 border border-blue-100">
-              <CardContent className="p-6">
-                <FileText className="w-8 h-8 mb-3 text-teal-600" />
-                <p className="text-4xl font-bold mb-1 text-blue-900">{stats.totalTests}</p>
-                <p className="text-teal-600">Total Tests</p>
-              </CardContent>
-            </Card>
+          {/* Stats Ribbon */}
+          <div className="bg-white rounded-[2rem] border border-slate-100 p-2 mb-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+            <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+              <div className="p-3 bg-violet-50 text-violet-600 rounded-2xl">
+                <FileText className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xl font-black text-slate-900 leading-none">{stats.totalTests}</p>
+                <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Assessments</p>
+              </div>
+            </div>
 
+            <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+              <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+                <CheckCircle className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xl font-black text-slate-900 leading-none">{stats.completedTests}</p>
+                <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Completed</p>
+              </div>
+            </div>
 
-            <Card className="bg-green-50 border border-green-100">
-              <CardContent className="p-6">
-                <CheckCircle className="w-8 h-8 mb-3 text-green-600" />
-                <p className="text-4xl font-bold mb-1 text-green-900">{stats.completedTests}</p>
-                <p className="text-green-600">Completed</p>
-              </CardContent>
-            </Card>
+            <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+              <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+                <Target className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xl font-black text-slate-900 leading-none">{stats.avgTestScore}%</p>
+                <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Avg Performance</p>
+              </div>
+            </div>
 
-
-            <Card className="bg-purple-50 border border-purple-100">
-              <CardContent className="p-6">
-                <Target className="w-8 h-8 mb-3 text-purple-600" />
-                <p className="text-4xl font-bold mb-1 text-purple-900">{stats.avgTestScore}%</p>
-                <p className="text-purple-600">Avg Score</p>
-              </CardContent>
-            </Card>
-
-
-            <Card className="bg-yellow-50 border border-yellow-100">
-              <CardContent className="p-6">
-                <Trophy className="w-8 h-8 mb-3 text-yellow-600" />
-                <p className="text-4xl font-bold mb-1 text-yellow-900">{stats.topPerformers}</p>
-                <p className="text-yellow-600">Top Performers</p>
-              </CardContent>
-            </Card>
+            <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+              <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+                <Trophy className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xl font-black text-slate-900 leading-none">{stats.topPerformers}</p>
+                <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Top Performers</p>
+              </div>
+            </div>
           </div>
 
 

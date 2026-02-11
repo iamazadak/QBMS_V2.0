@@ -9,6 +9,7 @@ import { Users, Plus, Search, Download, Filter, Eye, Edit2, Trash2, UserPlus, Ca
 import { Candidate, Program, Course, Classroom } from "@/entities/all";
 import { format } from "date-fns";
 import AddCandidateModal from "@/components/candidates/AddCandidateModal";
+import KpiCard from "@/components/shared/KpiCard";
 
 export default function CandidatesPage() {
   const [candidates, setCandidates] = useState([]);
@@ -187,79 +188,63 @@ export default function CandidatesPage() {
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Candidates Management</h1>
+          <h1>Candidates Management</h1>
           <p className="text-slate-600 mt-1 md:mt-2 text-sm md:text-base">Manage and track your enrolled student information</p>
         </div>
 
         <div className="flex flex-wrap gap-2 md:gap-3 w-full lg:w-auto">
-          <Button variant="outline" onClick={exportToCSV} disabled={filteredCandidates.length === 0} className="flex-1 md:flex-none text-sm justify-center hover:bg-emerald-500 hover:text-white transition-all">
+          <Button variant="outline" onClick={exportToCSV} disabled={filteredCandidates.length === 0} className="flex-1 md:flex-none">
             <Download className="w-4 h-4 mr-2" />
             Export CSV
           </Button>
-          <Button onClick={() => setShowAddModal(true)} variant="default" className="flex-1 md:flex-none text-sm justify-center hover:bg-emerald-500 hover:text-white transition-all">
+          <Button onClick={() => setShowAddModal(true)} variant="primary" className="flex-1 md:flex-none">
             <UserPlus className="w-4 h-4 mr-2" />
             Add Candidate
           </Button>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
-        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="p-2 md:p-4 bg-violet-50 rounded-xl">
-                <Users className="w-4 h-4 md:w-6 md:h-6 text-violet-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Total Candidates</p>
-              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{candidates.length}</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Ribbon */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 p-2 mb-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-violet-50 text-violet-600 rounded-2xl">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{candidates.length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Students</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="p-2 md:p-4 bg-emerald-50 rounded-xl">
-                <CheckCircle className="w-4 h-4 md:w-6 md:h-6 text-emerald-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Active</p>
-              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{candidates.filter(c => c.status === 'active').length}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+            <CheckCircle className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{candidates.filter(c => c.status === 'active').length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Active Now</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="p-2 md:p-4 bg-blue-50 rounded-xl">
-                <GraduationCap className="w-4 h-4 md:w-6 md:h-6 text-blue-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Graduated</p>
-              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{candidates.filter(c => c.status === 'graduated').length}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+            <GraduationCap className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{candidates.filter(c => c.status === 'graduated').length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Graduated</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="p-2 md:p-4 bg-amber-50 rounded-xl">
-                <Clock className="w-4 h-4 md:w-6 md:h-6 text-amber-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Inactive</p>
-              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{candidates.filter(c => c.status === 'inactive').length}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+            <Clock className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{candidates.filter(c => c.status === 'inactive').length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Inactive</p>
+          </div>
+        </div>
       </div>
 
       {/* Filters and Table Card */}
@@ -347,22 +332,25 @@ export default function CandidatesPage() {
                       <div className="flex gap-2">
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => handleViewCandidate(candidate)}
+                          className="rounded-xl"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => handleEditCandidate(candidate)}
+                          className="rounded-xl"
                         >
                           <Edit2 className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
-                          size="sm"
+                          size="icon"
                           onClick={() => handleDeleteCandidate(candidate.id)}
+                          className="rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>

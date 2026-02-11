@@ -140,7 +140,7 @@ export default function ReportedQuestionsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4">Loading reported questions...</p>
@@ -151,7 +151,7 @@ export default function ReportedQuestionsPage() {
 
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900">Reported Questions</h1>
@@ -159,77 +159,58 @@ export default function ReportedQuestionsPage() {
       </div>
 
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8">
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-violet-50 rounded-xl">
-                <AlertTriangle className="w-6 h-6 text-violet-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Total Reports</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.total}</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Ribbon */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 p-2 mb-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-violet-50 text-violet-600 rounded-2xl">
+            <AlertTriangle className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{stats.total}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Reports</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-amber-50 rounded-xl">
-                <Clock className="w-6 h-6 text-amber-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Pending</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.pending}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+            <Clock className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{stats.pending}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Pending</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-orange-50 rounded-xl">
-                <Eye className="w-6 h-6 text-orange-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Reviewing</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.reviewing}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-orange-50 text-orange-600 rounded-2xl">
+            <Eye className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{stats.reviewing}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Reviewing</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-emerald-50 rounded-xl">
-                <CheckCircle className="w-6 h-6 text-emerald-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Resolved</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.resolved}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+            <CheckCircle className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{stats.resolved}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Resolved</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-rose-50 rounded-xl">
-                <AlertTriangle className="w-6 h-6 text-rose-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">High Priority</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.highPriority}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl relative">
+            <AlertTriangle className="w-5 h-5" />
+            {stats.highPriority > 0 && <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-white animate-pulse"></div>}
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{stats.highPriority}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">High Priority</p>
+          </div>
+        </div>
       </div>
 
 

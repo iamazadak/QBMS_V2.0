@@ -162,7 +162,7 @@ export default function ManageCandidatesModal({ isOpen, onClose, classroom, onUp
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-red-500 hover:text-red-700"
+                            className="h-8 w-8 rounded-xl text-red-500 hover:text-red-700"
                             onClick={() => handleRemoveCandidate(candidate.classroom_candidate_id)}
                           >
                             <X className="h-4 w-4" />
@@ -238,10 +238,10 @@ export default function ManageCandidatesModal({ isOpen, onClose, classroom, onUp
                       {selectedCandidates.length} candidate(s) selected
                     </span>
                     <Button
+                      variant="primary"
                       size="sm"
                       onClick={handleAddCandidates}
                       disabled={isLoading}
-                      className="bg-teal-600 hover:bg-teal-700"
                     >
                       <UserPlus className="w-4 h-4 mr-1" />
                       {isLoading ? "Adding..." : "Add Selected"}

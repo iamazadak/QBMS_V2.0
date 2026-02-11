@@ -1,3 +1,39 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans text-slate-600 antialiased;
+  }
+
+  h1 {
+    @apply text-3xl font-extrabold tracking-tight text-slate-900;
+  }
+
+  h2 {
+    @apply text-2xl font-bold tracking-tight text-slate-800;
+  }
+
+  h3 {
+    @apply text-xl font-semibold text-slate-800;
+  }
+
+  p {
+    @apply leading-relaxed;
+  }
+}
+
+@layer components {
+  .text-description {
+    @apply text-slate-500 font-medium text-base;
+  }
+
+  .text-filter-label {
+    @apply text-xs font-semibold uppercase tracking-wider text-slate-500;
+  }
+
+  .text-subscript {
+    @apply text-xs font-medium text-slate-400;
+  }
+}

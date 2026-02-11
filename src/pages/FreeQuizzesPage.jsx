@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Gift, Search, Play, Users, Clock, Star, TrendingUp, Heart, Award } from "lucide-react";
+import { Gift, Search, Play, Users, Clock, Star, TrendingUp, Heart, Award, Zap, FileText } from "lucide-react";
+import KpiCard from "@/components/shared/KpiCard";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 
@@ -235,7 +236,7 @@ export default function FreeQuizzesPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4">Loading free quizzes...</p>
@@ -249,70 +250,56 @@ export default function FreeQuizzesPage() {
     <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
       {/* Header */}
       <div className="mb-8">
-        <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900`}>Free Quizzes</h1>
-        <p className={`text-slate-600 mt-2 ${isMobile ? 'text-sm' : ''}`}>Explore our collection of free, community-created quizzes</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">Free Assessments</h1>
+        <p className="text-slate-500 font-medium text-base">Explore our collection of free, community-created assessments</p>
       </div>
 
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-rose-50 rounded-xl">
-                <Gift className="w-6 h-6 text-rose-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Total Quizzes</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{quizzes.length}</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Ribbon */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 p-2 mb-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-violet-50 text-violet-600 rounded-2xl">
+            <Gift className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{quizzes.length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Assessments</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-violet-50 rounded-xl">
-                <Users className="w-6 h-6 text-violet-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Total Participants</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{(quizzes.reduce((sum, quiz) => sum + quiz.participants, 0) / 1000).toFixed(1)}K</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">
+              {(quizzes.reduce((sum, quiz) => sum + quiz.participants, 0) / 1000).toFixed(1)}K
+            </p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Participants</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-amber-50 rounded-xl">
-                <Star className="w-6 h-6 text-amber-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Avg Rating</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">
-                {quizzes.length > 0 ? (quizzes.reduce((sum, quiz) => sum + quiz.rating, 0) / quizzes.length).toFixed(1) : 'N/A'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+            <Star className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">
+              {quizzes.length > 0 ? (quizzes.reduce((sum, quiz) => sum + quiz.rating, 0) / quizzes.length).toFixed(1) : 'N/A'}
+            </p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Avg Rating</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-emerald-50 rounded-xl">
-                <Award className="w-6 h-6 text-emerald-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Categories</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{categories.length}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl">
+            <Award className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{categories.length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Categories</p>
+          </div>
+        </div>
       </div>
 
 
@@ -321,10 +308,10 @@ export default function FreeQuizzesPage() {
         <div className="relative lg:col-span-2">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
           <Input
-            placeholder="Search quizzes by title, description, or tags..."
+            placeholder="Search assessments by title, description, or tags..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-11 bg-white border-slate-200 focus:ring-2 focus:ring-teal-500/20 rounded-xl"
           />
         </div>
 
@@ -369,7 +356,7 @@ export default function FreeQuizzesPage() {
       {/* Featured Quizzes */}
       {filteredQuizzes.some(quiz => quiz.isFeatured) && (
         <div className="mb-8">
-          <h2 className="text-xl font-semibold text-slate-900 mb-4">Featured Quizzes</h2>
+          <h2 className="text-xl font-semibold text-slate-900 mb-4">Featured Assessments</h2>
           <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-3 gap-6'}`}>
             {filteredQuizzes.filter(quiz => quiz.isFeatured).slice(0, 3).map((quiz) => (
               <Card key={quiz.id} className="hover:shadow-lg transition-all duration-300 border-slate-200/60 overflow-hidden">
@@ -411,9 +398,9 @@ export default function FreeQuizzesPage() {
                     </div>
                   </div>
 
-                  <Button className="w-full bg-teal-600 hover:bg-teal-700">
-                    <Play className="w-4 h-4 mr-2" />
-                    Start Quiz
+                  <Button variant="primary" size="lg" className="w-full">
+                    <Play className="w-4 h-4 mr-2 fill-current" />
+                    Start Assessment
                   </Button>
                 </CardContent>
               </Card>
@@ -427,7 +414,7 @@ export default function FreeQuizzesPage() {
       <div>
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold text-slate-900">
-            All Quizzes ({filteredQuizzes.length})
+            All Assessments ({filteredQuizzes.length})
           </h2>
         </div>
 
@@ -436,85 +423,78 @@ export default function FreeQuizzesPage() {
           <Card className="text-center py-16">
             <CardContent>
               <Gift className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">No quizzes found</h3>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">No assessments found</h3>
               <p className="text-slate-600 mb-6">
                 {searchTerm || categoryFilter !== "all" || difficultyFilter !== "all"
                   ? "Try adjusting your search filters"
-                  : "Free quizzes will appear here once added to the system"}
+                  : "Free assessments will appear here once added to the system"}
               </p>
             </CardContent>
           </Card>
         ) : (
-          <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
+          <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-2 lg:grid-cols-3 gap-8'}`}>
             {filteredQuizzes.map((quiz) => (
-              <Card key={quiz.id} className="hover:shadow-lg transition-shadow duration-300 border-slate-200/60">
-                {/* Add a thumbnail to each quiz card for visual appeal */}
-                <div className="relative">
+              <Card key={quiz.id} className="group hover:shadow-2xl transition-all duration-500 border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2.5rem] overflow-hidden bg-white flex flex-col">
+                <div className="relative overflow-hidden aspect-video">
                   <div
-                    className="h-40 bg-cover bg-center rounded-t-lg"
+                    className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
                     style={{ backgroundImage: `url(${quiz.thumbnail})` }}
                   ></div>
-                  {quiz.isFeatured && (
-                    <Badge className="absolute top-3 left-3 bg-yellow-500 text-white">
-                      Featured
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity"></div>
+
+                  <div className="absolute top-4 left-4 flex gap-2">
+                    <Badge className="bg-teal-500 text-white font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg">
+                      {quiz.isNew ? 'NEW' : 'ASSESSMENT'}
                     </Badge>
+                  </div>
+
+                  {quiz.isFeatured && (
+                    <div className="absolute top-4 right-4 animate-pulse">
+                      <div className="p-2 bg-yellow-400 rounded-full shadow-lg">
+                        <Zap className="w-4 h-4 text-white fill-current" />
+                      </div>
+                    </div>
                   )}
                 </div>
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        {quiz.isNew && (
-                          <Badge className="bg-green-500 text-white text-xs">NEW</Badge>
-                        )}
-                        <Badge variant="secondary" className={getCategoryColor(quiz.category)}>
-                          {quiz.category}
-                        </Badge>
-                      </div>
-                      <CardTitle className="text-lg line-clamp-2 mb-2">
-                        {quiz.title}
-                      </CardTitle>
-                      <p className="text-slate-600 text-sm line-clamp-2">
-                        {quiz.description}
-                      </p>
-                    </div>
-                  </div>
-                </CardHeader>
 
-                <CardContent>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Badge variant="secondary" className={getDifficultyColor(quiz.difficulty)}>
+                <CardHeader className="pb-4 pt-6 px-8">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Badge variant="outline" className={`${getCategoryColor(quiz.category)} border-none font-black text-[9px] uppercase tracking-[0.15em] px-0`}>
+                      {quiz.category}
+                    </Badge>
+                    <span className="text-slate-300 text-[10px]">•</span>
+                    <Badge variant="outline" className={`${getDifficultyColor(quiz.difficulty)} border-none font-black text-[9px] uppercase tracking-[0.15em] px-0`}>
                       {quiz.difficulty}
                     </Badge>
-                    <span className="text-xs text-slate-500">by {quiz.author}</span>
+                  </div>
+                  <CardTitle className="text-xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-teal-600 transition-colors line-clamp-1">
+                    {quiz.title}
+                  </CardTitle>
+                </CardHeader>
+
+                <CardContent className="px-8 pb-8 flex-1 flex flex-col">
+                  <p className="text-slate-400 text-xs font-medium leading-relaxed italic line-clamp-2 mb-8 flex-1">
+                    "{quiz.description}"
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-4 mb-8 p-4 bg-slate-50 rounded-3xl border border-slate-100/50 group-hover:bg-white group-hover:border-teal-100 transition-all">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-amber-500" />
+                      <span className="text-[11px] font-black text-slate-700">{quiz.duration} MIN</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <TrendingUp className="w-4 h-4 text-teal-500" />
+                      <span className="text-[11px] font-black text-slate-700">{quiz.questions} QUES</span>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4 text-sm text-slate-600 mb-4">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      <span>{quiz.duration} min</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
-                      <span>{quiz.participants.toLocaleString()}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 fill-current text-yellow-500" />
-                      <span>{quiz.rating}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <TrendingUp className="w-4 h-4" />
-                      <span>{quiz.questions}Q</span>
-                    </div>
-                  </div>
-
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      <Heart className="w-4 h-4" />
+                  <div className="flex gap-3">
+                    <Button variant="outline" size="lg" className="px-5">
+                      <Heart className="w-5 h-5" />
                     </Button>
-                    <Button className="flex-1 bg-slate-900 hover:bg-slate-800">
-                      <Play className="w-4 h-4 mr-2" />
-                      Start Quiz
+                    <Button variant="primary" size="lg" className="flex-1 group-hover:-translate-y-1">
+                      <Play className="w-5 h-5 mr-3 fill-current" />
+                      START ASSESSMENT
                     </Button>
                   </div>
                 </CardContent>

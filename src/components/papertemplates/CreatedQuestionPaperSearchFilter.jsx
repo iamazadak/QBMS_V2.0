@@ -5,33 +5,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 export default function CreatedQuestionPaperSearchFilter({ onFiltersChange, activeFilters, filterData }) {
   return (
-    <div className="p-4 bg-white rounded-lg shadow-sm mb-8">
+    <div className="bg-transparent mb-8">
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         <Input
           placeholder="Search by title..."
           value={activeFilters.search || ''}
           onChange={(e) => onFiltersChange({ ...activeFilters, search: e.target.value })}
+          className="rounded-xl border-slate-100 font-bold text-xs py-5 bg-slate-50/50 focus:bg-white transition-all px-4"
         />
         <Select value={activeFilters.program || ''} onValueChange={(value) => onFiltersChange({ ...activeFilters, program: value })}>
-          <SelectTrigger><SelectValue placeholder="Program" /></SelectTrigger>
+          <SelectTrigger className="rounded-xl border-slate-100 font-bold text-xs py-5 bg-slate-50/50 focus:bg-white transition-all px-4"><SelectValue placeholder="Program" /></SelectTrigger>
           <SelectContent>
             {filterData.programs.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={activeFilters.course || ''} onValueChange={(value) => onFiltersChange({ ...activeFilters, course: value })}>
-          <SelectTrigger><SelectValue placeholder="Course" /></SelectTrigger>
+          <SelectTrigger className="rounded-xl border-slate-100 font-bold text-xs py-5 bg-slate-50/50 focus:bg-white transition-all px-4"><SelectValue placeholder="Course" /></SelectTrigger>
           <SelectContent>
             {filterData.courses.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={activeFilters.subject || ''} onValueChange={(value) => onFiltersChange({ ...activeFilters, subject: value })}>
-          <SelectTrigger><SelectValue placeholder="Subject" /></SelectTrigger>
+          <SelectTrigger className="rounded-xl border-slate-100 font-bold text-xs py-5 bg-slate-50/50 focus:bg-white transition-all px-4"><SelectValue placeholder="Subject" /></SelectTrigger>
           <SelectContent>
             {filterData.subjects.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
           </SelectContent>
         </Select>
         <Select value={activeFilters.year || ''} onValueChange={(value) => onFiltersChange({ ...activeFilters, year: value })}>
-          <SelectTrigger><SelectValue placeholder="Year" /></SelectTrigger>
+          <SelectTrigger className="rounded-xl border-slate-100 font-bold text-xs py-5 bg-slate-50/50 focus:bg-white transition-all px-4"><SelectValue placeholder="Year" /></SelectTrigger>
           <SelectContent>
             {filterData.years.map(y => <SelectItem key={y} value={y}>{y}</SelectItem>)}
           </SelectContent>

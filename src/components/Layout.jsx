@@ -101,6 +101,24 @@ const managementItems = [
     url: createPageUrl("Roles"),
     icon: Shield,
     description: "Manage system access"
+  },
+  {
+    title: "Candidates",
+    url: "/candidates",
+    icon: Users,
+    description: "Manage students"
+  },
+  {
+    title: "Classrooms",
+    url: "/classrooms",
+    icon: Users,
+    description: "Manage cohorts"
+  },
+  {
+    title: "Online Sessions",
+    url: "/onlinesessions",
+    icon: Video,
+    description: "Live classes"
   }
 ];
 
@@ -205,7 +223,8 @@ export default function Layout({ children, currentPageName }) {
             {/* Administration */}
             {(() => {
               const visibleManagementItems = managementItems.filter(item => {
-                if (item.title === "Roles & Permissions") return profile?.role === 'admin';
+                const adminOnly = ["Roles & Permissions", "Candidates", "Classrooms", "Online Sessions"];
+                if (adminOnly.includes(item.title)) return profile?.role === 'admin';
                 if (item.title === "Paper Templates") return ['admin', 'trainer'].includes(profile?.role);
                 return false;
               });

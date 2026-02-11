@@ -174,7 +174,7 @@ export default function SavedQuestionsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4">Loading saved questions...</p>
@@ -193,49 +193,37 @@ export default function SavedQuestionsPage() {
       </div>
 
 
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-violet-50 rounded-xl">
-                <Bookmark className="w-6 h-6 text-violet-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Total Saved</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{savedQuestions.length}</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Ribbon */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 p-2 mb-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-violet-50 text-violet-600 rounded-2xl">
+            <Bookmark className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{savedQuestions.length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Saved</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-rose-50 rounded-xl">
-                <Heart className="w-6 h-6 text-rose-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Favorites</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{savedQuestions.filter(q => q.is_favorite).length}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl">
+            <Heart className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{savedQuestions.filter(q => q.is_favorite).length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Favorites</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-emerald-50 rounded-xl">
-                <Edit2 className="w-6 h-6 text-emerald-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">With Notes</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{savedQuestions.filter(q => q.notes).length}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+            <Edit2 className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{savedQuestions.filter(q => q.notes).length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">With Notes</p>
+          </div>
+        </div>
       </div>
 
 
@@ -281,7 +269,7 @@ export default function SavedQuestionsPage() {
             <Bookmark className="w-16 h-16 text-slate-300 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-slate-900 mb-2">No saved questions found</h3>
             <p className="text-slate-600 mb-6">Start saving questions from the Question Bank to see them here</p>
-            <Button className="bg-teal-600 hover:bg-teal-700">
+            <Button variant="primary">
               <Bookmark className="w-4 h-4 mr-2" />
               Browse Questions
             </Button>
@@ -317,6 +305,7 @@ export default function SavedQuestionsPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleToggleFavorite(savedItem)}
+                        className="rounded-xl"
                       >
                         <Heart className={`w-4 h-4 ${savedItem.is_favorite ? 'text-red-500 fill-current' : 'text-slate-400'}`} />
                       </Button>
@@ -327,6 +316,7 @@ export default function SavedQuestionsPage() {
                           setEditingItem(savedItem);
                           setShowEditModal(true);
                         }}
+                        className="rounded-xl"
                       >
                         <Edit2 className="w-4 h-4" />
                       </Button>
@@ -334,8 +324,9 @@ export default function SavedQuestionsPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => handleUnsave(savedItem.id)}
+                        className="rounded-xl text-red-500 hover:text-red-600 hover:bg-red-50"
                       >
-                        <Trash2 className="w-4 h-4 text-red-500" />
+                        <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>
                   </div>
@@ -484,7 +475,7 @@ function EditSavedQuestionForm({ savedItem, onSave, onCancel }) {
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
-        <Button type="submit">
+        <Button type="submit" variant="primary">
           Save Changes
         </Button>
       </DialogFooter>

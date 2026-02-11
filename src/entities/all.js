@@ -77,30 +77,83 @@ export class Question extends SupabaseEntity {
   constructor() { super('questions'); }
 
   async listWithDetails(sortBy = 'created_at', ascending = false) {
-    // Nested query: Questions -> Subjects -> Courses -> Programs
+    // Nested query: Questions -> Subjects -> Courses -> Programs + Tags & Options + Competencies
     const { data, error } = await supabase
       .from(this.tableName)
-      .select('*, options(*), subjects(*, courses(*, programs(*)))')
+      .select('*, options(*), subjects(*, courses(*, programs(*))), competencies(*), question_tags(tags(*))')
       .order(sortBy, { ascending });
 
     if (error) throw error;
 
     // Flatten nested structure
     return data.map(q => {
-      // Safe access to nested properties
       const subject = q.subjects;
-      // Note: 'subjects' here is an object object if relation is 1-to-1 or N-to-1
-      // If it returns an array, we'd need subject[0].
       const course = subject?.courses;
       const program = course?.programs;
+      const competency = q.competencies;
+      const tags = (q.question_tags || []).map(qt => qt.tags).filter(Boolean);
 
       return {
         ...q,
         subject: subject,
         course: course,
-        program: program
+        program: program,
+        competency: competency,
+        tags: tags
       };
     });
+  }
+
+  async syncTags(questionId, tagNames) {
+    if (!questionId) return;
+
+    // 1. Get/Create all tags in the tags table
+    const cleanedTagNames = [...new Set(tagNames.map(t => t.trim()).filter(Boolean))];
+    const tagsToInsert = cleanedTagNames.map(name => ({ name }));
+
+    // Supabase upsert doesn't return existing IDs easily for a simple list, 
+    // so we'll do: select existing -> insert missing -> get all IDs
+    const { data: existingTags } = await supabase
+      .from('tags')
+      .select('id, name')
+      .in('name', cleanedTagNames);
+
+    const existingNames = (existingTags || []).map(t => t.name);
+    const missingNames = cleanedTagNames.filter(name => !existingNames.includes(name));
+
+    let allTags = [...(existingTags || [])];
+
+    if (missingNames.length > 0) {
+      const { data: newTags, error: insertError } = await supabase
+        .from('tags')
+        .insert(missingNames.map(name => ({ name })))
+        .select();
+
+      if (insertError) throw insertError;
+      allTags = [...allTags, ...newTags];
+    }
+
+    // 2. Remove old associations
+    await supabase
+      .from('question_tags')
+      .delete()
+      .eq('question_id', questionId);
+
+    // 3. Create new associations
+    if (allTags.length > 0) {
+      const associations = allTags.map(tag => ({
+        question_id: questionId,
+        tag_id: tag.id
+      }));
+
+      const { error: assocError } = await supabase
+        .from('question_tags')
+        .insert(associations);
+
+      if (assocError) throw assocError;
+    }
+
+    return allTags;
   }
 }
 export class Option extends SupabaseEntity {
@@ -156,6 +209,9 @@ export class OnlineSession extends SupabaseEntity {
 }
 export class OnlineSessionAttendee extends SupabaseEntity {
   constructor() { super('online_session_attendees'); }
+}
+export class Competency extends SupabaseEntity {
+  constructor() { super('competencies'); }
 }
 
 export class PaperTemplate extends SupabaseEntity {

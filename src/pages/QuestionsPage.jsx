@@ -11,8 +11,9 @@ import SearchFilter from "../components/questions/SearchFilter";
 import QuestionTable from "../components/questions/QuestionTable";
 import MobileQuestionCard from "../components/questions/MobileQuestionCard";
 import AddEditQuestionModal from "../components/questions/AddEditQuestionModal";
-import CreateQuizModal from "../components/questions/CreateQuizModal";
+import CreateAssessmentModal from "../components/questions/CreateQuizModal";
 import BulkUploadModal from "../components/questions/BulkUploadModal";
+import KpiCard from "@/components/shared/KpiCard";
 
 
 export default function QuestionsPage() {
@@ -54,6 +55,10 @@ export default function QuestionsPage() {
       filtered = filtered.filter(q => String(q.subject_id) === filters.subject);
     }
 
+    if (filters.competency) {
+      filtered = filtered.filter(q => String(q.competency_id) === filters.competency);
+    }
+
     if (filters.course) {
       filtered = filtered.filter(q => String(q.course?.id) === filters.course);
     }
@@ -64,6 +69,12 @@ export default function QuestionsPage() {
 
     if (filters.year) {
       filtered = filtered.filter(q => q.subject?.year?.toString() === filters.year);
+    }
+
+    if (filters.tag) {
+      filtered = filtered.filter(q =>
+        q.tags?.some(tag => tag.name?.toLowerCase().includes(filters.tag.toLowerCase()))
+      );
     }
 
     setFilteredQuestions(filtered);
@@ -152,7 +163,7 @@ export default function QuestionsPage() {
 
   const handleQuizCreated = () => {
     setSelectedQuestions([]);
-    toast({ description: "Quiz created successfully! Check the Live Tests section to see your quiz." });
+    toast({ description: "Assessment created successfully! Check the Active Assessments section to see your assessment." });
   };
 
 
@@ -170,7 +181,7 @@ export default function QuestionsPage() {
       'question_text': q.question_text,
       'level': q.level || '',
       'positive_marks': q.positive_marks || 1,
-      'explanation': q.explanation || '',
+      'explanation': q.solution_explanation || q.explanation || '',
       'option_a_text': q.options?.find(opt => opt.option_label === 'A')?.option_text || '',
       'option_b_text': q.options?.find(opt => opt.option_label === 'B')?.option_text || '',
       'option_c_text': q.options?.find(opt => opt.option_label === 'C')?.option_text || '',
@@ -203,24 +214,32 @@ export default function QuestionsPage() {
     );
   };
 
+  const handleEditQuestion = (question) => {
+    if (question === null) {
+      setShowAddModal(true);
+    } else {
+      setEditingQuestion(question);
+    }
+  };
+
 
   return (
     <div className="p-4 md:p-6 pb-20 md:pb-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6 md:mb-8">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-slate-900">Question Bank</h1>
-          <p className="text-slate-600 mt-1 md:mt-2 text-sm md:text-base">Manage your educational questions and answers</p>
+          <h1>Question Bank</h1>
+          <p className="text-description">Manage your educational assessment items and resources</p>
         </div>
 
         <div className="flex flex-wrap gap-2 md:gap-3 w-full lg:w-auto">
           {/* Mobile Actions Group */}
           <div className="grid grid-cols-2 gap-2 w-full md:flex md:w-auto">
-            <Button variant="outline" onClick={handleExportCSV} disabled={filteredQuestions.length === 0} className="w-full md:w-auto text-sm justify-center hover:bg-emerald-500 hover:text-white transition-all">
+            <Button variant="outline" onClick={handleExportCSV} disabled={filteredQuestions.length === 0} className="w-full md:w-auto">
               <Download className="w-4 h-4 mr-2" />
               Export
             </Button>
-            <Button variant="outline" onClick={() => setShowBulkUploadModal(true)} className="w-full md:w-auto text-sm justify-center hover:bg-emerald-500 hover:text-white transition-all">
+            <Button variant="outline" onClick={() => setShowBulkUploadModal(true)} className="w-full md:w-auto">
               <Upload className="w-4 h-4 mr-2" />
               Upload
             </Button>
@@ -232,88 +251,68 @@ export default function QuestionsPage() {
               <>
                 <Button
                   onClick={handleCreateQuiz}
-                  variant="default"
-                  className="flex-1 md:flex-none text-sm justify-center hover:bg-emerald-500 hover:text-white animate-in zoom-in duration-200"
+                  variant="primary"
+                  className="flex-1 md:flex-none"
                 >
                   <Trophy className="w-4 h-4 mr-2" />
-                  Quiz ({selectedQuestions.length})
+                  Assessment ({selectedQuestions.length})
                 </Button>
-                <Button variant="destructive" onClick={() => handleDeleteSelected()} className="flex-1 md:flex-none text-sm justify-center hover:bg-red-600 transition-all">
+                <Button variant="destructive" onClick={() => handleDeleteSelected()} className="flex-1 md:flex-none">
                   <Trash2 className="w-4 h-4 mr-2" />
                   Delete ({selectedQuestions.length})
                 </Button>
               </>
             )}
-            <Button onClick={() => setShowAddModal(true)} variant="default" className="flex-1 md:flex-none text-sm justify-center hover:bg-emerald-500 hover:text-white transition-all">
+            <Button onClick={() => handleEditQuestion(null)} variant="secondary" className="flex-1 md:flex-none">
               <Plus className="w-4 h-4 mr-2" />
-              Add
+              Add Item
             </Button>
           </div>
         </div>
       </div>
 
 
-      {/* Stats Cards - Grid optimized for mobile (2 cols) vs Desktop (4 cols) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
-        {/* Total */}
-        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="p-2 md:p-4 bg-violet-50 rounded-xl">
-                <FileText className="w-4 h-4 md:w-6 md:h-6 text-violet-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Total</p>
-              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{questions.length}</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Ribbon */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 p-2 mb-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-violet-50 text-violet-600 rounded-2xl">
+            <FileText className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{questions.length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Questions</p>
+          </div>
+        </div>
 
-        {/* Easy */}
-        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="p-2 md:p-4 bg-emerald-50 rounded-xl">
-                <span className="text-emerald-600 font-bold text-sm md:text-lg">E</span>
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Easy</p>
-              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{questions.filter(q => q.level === 'easy').length}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center w-[44px] h-[44px]">
+            <span className="font-black text-lg">E</span>
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{questions.filter(q => q.level === 'easy').length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Easy Level</p>
+          </div>
+        </div>
 
-        {/* Medium */}
-        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="p-2 md:p-4 bg-amber-50 rounded-xl">
-                <span className="text-amber-600 font-bold text-sm md:text-lg">M</span>
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Medium</p>
-              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{questions.filter(q => q.level === 'medium').length}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center w-[44px] h-[44px]">
+            <span className="font-black text-lg">M</span>
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{questions.filter(q => q.level === 'medium').length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Medium Level</p>
+          </div>
+        </div>
 
-        {/* Hard */}
-        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="p-2 md:p-4 bg-rose-50 rounded-xl">
-                <span className="text-rose-600 font-bold text-sm md:text-lg">H</span>
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Hard</p>
-              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{questions.filter(q => q.level === 'hard').length}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl flex items-center justify-center w-[44px] h-[44px]">
+            <span className="font-black text-lg">H</span>
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{questions.filter(q => q.level === 'hard').length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Hard Level</p>
+          </div>
+        </div>
       </div>
 
 
@@ -322,15 +321,15 @@ export default function QuestionsPage() {
 
 
       {/* Data Display - Conditional Render based on Mobile/Desktop */}
-      <div className="mt-6">
+      <div className="mt-8 pb-10">
         {isLoading ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {[1, 2, 3].map(i => (
-              <Skeleton key={i} className="h-24 w-full rounded-xl" />
+              <div key={i} className="h-44 w-full bg-slate-100 animate-pulse rounded-2xl" />
             ))}
           </div>
         ) : isMobile ? (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {paginatedQuestions.length === 0 ? (
               <div className="text-center py-10 text-slate-500">No questions found.</div>
             ) : (
@@ -340,7 +339,7 @@ export default function QuestionsPage() {
                   question={question}
                   isSelected={selectedQuestions.includes(question.id)}
                   onSelect={handleSelectQuestion}
-                  onEdit={setEditingQuestion}
+                  onEdit={handleEditQuestion}
                   onDelete={handleDeleteSelected}
                 />
               ))
@@ -351,7 +350,7 @@ export default function QuestionsPage() {
             questions={paginatedQuestions}
             selectedQuestions={selectedQuestions}
             onSelectionChange={setSelectedQuestions}
-            onEditQuestion={setEditingQuestion}
+            onEditQuestion={handleEditQuestion}
             onDeleteQuestions={handleDeleteSelected}
             isLoading={false}
           />
@@ -389,11 +388,13 @@ export default function QuestionsPage() {
       <AddEditQuestionModal
         isOpen={showAddModal || editingQuestion !== null}
         onClose={() => {
+          console.log("Closing AddEditQuestionModal");
           setShowAddModal(false);
           setEditingQuestion(null);
         }}
         question={editingQuestion}
         onSave={() => {
+          console.log("Saving from AddEditQuestionModal");
           loadQuestions();
           setShowAddModal(false);
           setEditingQuestion(null);
@@ -402,12 +403,12 @@ export default function QuestionsPage() {
       />
 
 
-      {/* Create Quiz Modal */}
-      <CreateQuizModal
+      {/* Create Assessment Modal */}
+      <CreateAssessmentModal
         isOpen={showCreateQuizModal}
         onClose={() => setShowCreateQuizModal(false)}
         selectedQuestions={getSelectedQuestionObjects()}
-        onQuizCreated={handleQuizCreated}
+        onAssessmentCreated={handleQuizCreated}
       />
 
 

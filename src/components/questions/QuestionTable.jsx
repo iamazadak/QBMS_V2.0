@@ -1,9 +1,20 @@
 import React, { useState } from "react";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Edit2, Trash2, MoreHorizontal, FileText, Plus, Eye } from "lucide-react";
+import {
+  Edit2,
+  Trash2,
+  MoreHorizontal,
+  FileText,
+  Eye,
+  ChevronDown,
+  ChevronUp,
+  CheckCircle2,
+  Info,
+  Layers,
+  BookOpen
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,9 +23,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const levelColors = {
-  easy: "bg-green-100 text-green-800 border-green-200",
-  medium: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  hard: "bg-red-100 text-red-800 border-red-200",
+  easy: "bg-emerald-50 text-emerald-700 border-emerald-100",
+  medium: "bg-amber-50 text-amber-700 border-amber-100",
+  hard: "bg-rose-50 text-rose-700 border-rose-100",
 };
 
 export default function QuestionTable({
@@ -25,16 +36,16 @@ export default function QuestionTable({
   onDeleteQuestions,
   isLoading = false,
 }) {
-  const [selectAll, setSelectAll] = useState(false);
-  const [expandedQuestion, setExpandedQuestion] = useState(null);
+  const [expandedQuestions, setExpandedQuestions] = useState(new Set());
 
-  const handleSelectAll = (checked) => {
-    setSelectAll(checked);
-    if (checked) {
-      onSelectionChange(questions.map((q) => q.id));
+  const toggleExpand = (id) => {
+    const newExpanded = new Set(expandedQuestions);
+    if (newExpanded.has(id)) {
+      newExpanded.delete(id);
     } else {
-      onSelectionChange([]);
+      newExpanded.add(id);
     }
+    setExpandedQuestions(newExpanded);
   };
 
   const handleSelectQuestion = (questionId, checked) => {
@@ -45,233 +56,190 @@ export default function QuestionTable({
     }
   };
 
-  const toggleExpandQuestion = (questionId) => {
-    setExpandedQuestion(expandedQuestion === questionId ? null : questionId);
-  };
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="h-40 bg-slate-100 animate-pulse rounded-xl" />
+        ))}
+      </div>
+    );
+  }
 
-  const truncateText = (text, maxLength = 100) => {
-    if (!text) return "";
-    return text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
-  };
+  if (questions.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center">
+        <div className="bg-slate-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+          <FileText className="w-10 h-10 text-slate-300" />
+        </div>
+        <h3 className="text-xl font-bold text-slate-800">No questions found</h3>
+        <p className="text-slate-500 mt-2 max-w-sm mx-auto">
+          Try adjusting your filters or add a new question to your bank.
+        </p>
+        <Button onClick={() => onEditQuestion(null)} className="mt-6 bg-indigo-600 hover:bg-indigo-700">
+          Add First Question
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200/60 overflow-x-auto max-h-[60vh] overflow-y-auto">
-      {isLoading ? (
-        <Table>
-          <TableHeader className="bg-slate-50">
-            <TableRow>
-              <TableHead className="align-middle text-center p-4">
-                <Checkbox disabled />
-              </TableHead>
-              <TableHead className="align-middle text-left p-4">Question</TableHead>
-              <TableHead className="align-middle text-left p-4">Options</TableHead>
-              <TableHead className="align-middle text-left p-4">Answer</TableHead>
-              <TableHead className="align-middle text-left p-4">Subject</TableHead>
-              <TableHead className="align-middle text-left p-4">Level</TableHead>
-              <TableHead className="align-middle text-left p-4">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {[...Array(5)].map((_, i) => (
-              <TableRow key={i}>
-                <TableCell className="align-middle grid place-items-center p-4 h-full">
-                  <div className="h-4 w-4 bg-gray-200 rounded animate-pulse"></div>
-                </TableCell>
-                <TableCell className="align-middle">
-                  <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
-                </TableCell>
-                <TableCell className="align-middle">
-                  <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
-                </TableCell>
-                <TableCell className="align-middle">
-                  <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
-                </TableCell>
-                <TableCell className="align-middle">
-                  <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
-                </TableCell>
-                <TableCell className="align-middle">
-                  <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
-                </TableCell>
-                <TableCell className="align-middle flex items-center justify-center">
-                  <div className="h-4 w-8 bg-gray-200 rounded animate-pulse"></div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      ) : (
-        <div className="overflow-x-auto max-h-[60vh] overflow-y-auto">
-          <Table className="w-full">
-            <TableHeader className="bg-slate-50">
-              <TableRow>
-                <TableHead className="align-middle text-center p-4">
-                  <Checkbox checked={selectAll} onCheckedChange={handleSelectAll} />
-                </TableHead>
-                <TableHead className="align-middle text-left p-4">Question</TableHead>
-                <TableHead className="align-middle text-left p-4">Options</TableHead>
-                <TableHead className="align-middle text-left p-4">Answer</TableHead>
-                <TableHead className="align-middle text-left p-4">Subject</TableHead>
-                <TableHead className="align-middle text-left p-4">Level</TableHead>
-                <TableHead className="align-middle text-left p-4">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {questions.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12">
-                    <div className="text-slate-500 flex flex-col items-center justify-center">
-                      <FileText className="w-16 h-16 text-slate-300 mb-4" />
-                      <p className="text-lg font-medium">No questions found</p>
-                      <p className="text-sm mt-2">
-                        Try adjusting your search filters or add some questions to get started.
-                      </p>
-                      <Button variant="outline" className="mt-4" onClick={() => onEditQuestion(null)}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add New Question
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                questions.map((question, index) => (
-                  <React.Fragment key={question.id}>
-                    <TableRow
-                      className={`${index % 2 === 0 ? "bg-white" : "bg-slate-50"} hover:bg-slate-100 transition-colors duration-150`}
+    <div className="space-y-6">
+      {questions.map((question, index) => {
+        const isExpanded = expandedQuestions.has(question.id);
+        const correctAnswer = question.options?.find(opt => opt.is_correct);
+
+        return (
+          <div
+            key={question.id}
+            className={`group bg-white rounded-2xl border transition-all duration-300 shadow-sm hover:shadow-md ${selectedQuestions.includes(question.id) ? 'border-indigo-500 ring-1 ring-indigo-50' : 'border-slate-200'
+              }`}
+          >
+            {/* Card Header: Metadata & Selection */}
+            <div className="p-5 md:p-6 border-b border-slate-50 flex items-start justify-between gap-4">
+              <div className="flex items-start gap-4 flex-1">
+                <Checkbox
+                  checked={selectedQuestions.includes(question.id)}
+                  onCheckedChange={(checked) => handleSelectQuestion(question.id, checked)}
+                  className="mt-1.5"
+                />
+                <div className="space-y-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 bg-slate-100 px-2 py-0.5 rounded">
+                      Question {index + 1}
+                    </span>
+                  </div>
+                  <p className="text-slate-800 font-semibold text-lg leading-relaxed">
+                    {question.question_text}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1 shrink-0">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-400 hover:text-slate-600">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-40">
+                    <DropdownMenuItem onClick={() => onEditQuestion(question)} className="cursor-pointer">
+                      <Edit2 className="mr-2 h-4 w-4" /> Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => onDeleteQuestions([question.id])}
+                      className="cursor-pointer text-rose-600 focus:text-rose-700 focus:bg-rose-50"
                     >
-                      <TableCell className="align-middle grid place-items-center p-4 h-full">
-                        <Checkbox
-                          checked={selectedQuestions.includes(question.id)}
-                          onCheckedChange={(checked) => handleSelectQuestion(question.id, checked)}
-                        />
-                      </TableCell>
-                      <TableCell className="align-middle">
-                        <div>
-                          <p className="text-slate-700">{truncateText(question.question_text)}</p>
-                          {question.explanation && (
-                            <p className="text-sm text-slate-500 mt-1">Explanation available</p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="align-middle">
-                        {question.options?.sort((a, b) => a.option_label.localeCompare(b.option_label)).map((option, optIndex) => (
-                          <div key={optIndex} className="text-sm text-slate-600">
-                            <span>{option.option_label}:</span> {truncateText(option.option_text)}
-                          </div>
-                        ))}
-                      </TableCell>
-                      <TableCell className="align-middle">
-                        <Badge variant="secondary" className="font-medium bg-blue-100 text-blue-800">
-                          {question.options?.find((opt) => opt.is_correct)?.option_text || "—"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="align-middle">
-                        <div className="text-sm">
-                          <p className="text-slate-700">{question.subject?.name || "No Subject"}</p>
-                          <p className="text-slate-500">{question.course?.name || "No Course"}</p>
-                          {question.program && (
-                            <p className="text-xs text-slate-400">{question.program.name}</p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="align-middle">
-                        <Badge
-                          variant="secondary"
-                          className={`${levelColors[question.level] || "bg-gray-100 text-gray-800"} border`}
-                        >
-                          {question.level?.charAt(0).toUpperCase() + question.level?.slice(1) || "—"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="align-middle grid place-items-center p-4 h-full">
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className={`h-8 w-8 ${expandedQuestion === question.id ? 'text-teal-600' : ''}`}
-                            onClick={() => toggleExpandQuestion(question.id)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            onClick={() => onEditQuestion(question)}
-                          >
-                            <Edit2 className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 text-red-600 hover:bg-red-100"
-                            onClick={() => onDeleteQuestions([question.id])}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    {expandedQuestion === question.id && (
-                      <TableRow>
-                        <TableCell colSpan={7} className="p-0">
-                          <div className="bg-slate-100 p-4">
-                            <h3 className="text-lg font-bold mb-4">Question Details</h3>
-                            <div className="space-y-4">
-                              <div>
-                                <p className="font-semibold text-slate-800">Question:</p>
-                                <p className="text-slate-700">{question.question_text}</p>
-                              </div>
-                              <div>
-                                <p className="font-semibold text-slate-800">Explanation:</p>
-                                <p className="text-slate-700">{question.explanation || "No explanation available."}</p>
-                              </div>
-                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div>
-                                  <p className="font-semibold text-slate-800">Level:</p>
-                                  <p className="text-slate-700">{question.level}</p>
-                                </div>
-                                <div>
-                                  <p className="font-semibold text-slate-800">Positive Marks:</p>
-                                  <p className="text-slate-700">{question.positive_marks}</p>
-                                </div>
-                                <div>
-                                  <p className="font-semibold text-slate-800">Year:</p>
-                                  <p className="text-slate-700">{question.subject?.year}</p>
-                                </div>
-                                <div>
-                                  <p className="font-semibold text-slate-800">Program:</p>
-                                  <p className="text-slate-700">{question.program?.name}</p>
-                                </div>
-                                <div>
-                                  <p className="font-semibold text-slate-800">Course:</p>
-                                  <p className="text-slate-700">{question.course?.name}</p>
-                                </div>
-                                <div>
-                                  <p className="font-semibold text-slate-800">Subject:</p>
-                                  <p className="text-slate-700">{question.subject?.name}</p>
-                                </div>
-                              </div>
-                              <div>
-                                <p className="font-semibold text-slate-800">Options:</p>
-                                <ul className="list-disc list-inside">
-                                  {question.options?.map((option) => (
-                                    <li key={option.id} className={option.is_correct ? "font-bold text-green-600" : ""}>
-                                      {option.option_label}: {option.option_text}
-                                    </li>
-                                  ))}
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </React.Fragment>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </div>
+
+            {/* Options Preview (Vertical List) */}
+            <div className="px-6 pb-2 pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {question.options?.map((option) => (
+                  <div
+                    key={option.id}
+                    className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${isExpanded && option.is_correct
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                      : 'bg-slate-50/30 border-slate-100 text-slate-600'
+                      }`}
+                  >
+                    <span className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-bold leading-none ${isExpanded && option.is_correct ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-500'
+                      }`}>
+                      {option.option_label}
+                    </span>
+                    <span className="text-sm font-medium">{option.option_text}</span>
+                    {isExpanded && option.is_correct && <CheckCircle2 className="w-4 h-4 ml-auto text-emerald-500" />}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Solution/Explanation (Collapsible) */}
+            {isExpanded && (
+              <div className="px-6 pb-6 pt-4 animate-in slide-in-from-top-4 duration-300">
+                <div className="bg-indigo-50/50 rounded-2xl p-5 border border-indigo-100 flex gap-4">
+                  <div className="bg-white w-10 h-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm border border-indigo-100">
+                    <Info className="w-5 h-5 text-indigo-500" />
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-indigo-600">Detailed Solution</h4>
+                    <p className="text-slate-700 text-sm leading-relaxed">
+                      {question.solution_explanation || question.explanation || "No explanation provided for this question."}
+                    </p>
+                    <div className="flex items-center gap-2 mt-3 pt-3 border-t border-indigo-100/50">
+                      <span className="text-[10px] font-bold text-slate-400">Correct Option:</span>
+                      <Badge variant="secondary" className="bg-emerald-500 text-white border-transparent">
+                        Option {correctAnswer?.option_label}
+                      </Badge>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Footer Actions */}
+            <div className="px-5 py-4 bg-slate-50/50 rounded-b-2xl border-t border-slate-50 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Badge variant="outline" className={`${levelColors[question.level]} capitalize border shadow-none text-[10px] h-5 px-1.5`}>
+                  {question.level}
+                </Badge>
+                <div className="w-1 h-1 bg-slate-300 rounded-full" />
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-500">
+                  <BookOpen className="w-3 h-3 text-slate-400" />
+                  {question.subject?.name || 'General'}
+                </div>
+                {question.competency && (
+                  <>
+                    <div className="w-1 h-1 bg-slate-300 rounded-full" />
+                    <div className="flex items-center gap-1.5 text-xs font-bold text-indigo-600">
+                      <CheckCircle2 className="w-3 h-3" />
+                      {question.competency.name}
+                    </div>
+                  </>
+                )}
+                <div className="w-1 h-1 bg-slate-300 rounded-full" />
+                <div className="flex items-center gap-1.5 text-xs font-bold text-slate-400 uppercase tracking-tighter">
+                  <Layers className="w-3 h-3" />
+                  {question.course?.name || 'N/A'}
+                </div>
+                <div className="w-1 h-1 bg-slate-300 rounded-full" />
+                <span className="text-xs font-bold text-indigo-500">+{question.positive_marks} Marks</span>
+                {/* Display Tags in Footer */}
+                {question.tags && question.tags.length > 0 && (
+                  <>
+                    <div className="w-1 h-1 bg-slate-300 rounded-full" />
+                    <div className="flex flex-wrap gap-1.5">
+                      {question.tags.map(tag => (
+                        <span key={tag.id} className="text-[9px] bg-teal-500 text-white px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">
+                          {tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleExpand(question.id)}
+                className={`text-xs font-bold transition-all ${isExpanded ? 'text-indigo-600 bg-indigo-50' : 'text-slate-500 hover:text-indigo-600 hover:bg-indigo-50'}`}
+              >
+                {isExpanded ? (
+                  <>Hide Solution <ChevronUp className="ml-1 w-4 h-4" /></>
+                ) : (
+                  <>View Solution <ChevronDown className="ml-1 w-4 h-4" /></>
+                )}
+              </Button>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

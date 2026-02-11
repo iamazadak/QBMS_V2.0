@@ -21,6 +21,9 @@ import SavedQuestionsPage from "./pages/SavedQuestionsPage";
 import ReportedQuestionsPage from "./pages/ReportedQuestionsPage";
 import PaperPreviewPage from "./pages/PaperPreviewPage";
 import CreatedQuestionPapersPage from "./pages/CreatedQuestionPapersPage";
+import CandidatesPage from "./pages/CandidatesPage";
+import ClassroomsPage from "./pages/ClassroomsPage";
+import OnlineSessionsPage from "./pages/OnlineSessionsPage";
 
 import { HomeRedirect } from "./components/HomeRedirect";
 
@@ -67,7 +70,7 @@ function App() {
             }
           />
           <Route
-            path="/test-series"
+            path="/testseries"
             element={
               <ProtectedRoute>
                 <Layout>
@@ -77,7 +80,7 @@ function App() {
             }
           />
           <Route
-            path="/previous-year-papers"
+            path="/previousyearpapers"
             element={
               <ProtectedRoute>
                 <Layout>
@@ -97,7 +100,7 @@ function App() {
             }
           />
           <Route
-            path="/free-quizzes"
+            path="/freequizzes"
             element={
               <ProtectedRoute>
                 <Layout>
@@ -137,7 +140,7 @@ function App() {
             }
           />
           <Route
-            path="/attempted-tests"
+            path="/attemptedtests"
             element={
               <ProtectedRoute>
                 <Layout>
@@ -147,7 +150,7 @@ function App() {
             }
           />
           <Route
-            path="/saved-questions"
+            path="/savedquestions"
             element={
               <ProtectedRoute>
                 <Layout>
@@ -157,7 +160,37 @@ function App() {
             }
           />
           <Route
-            path="/reported-questions"
+            path="/candidates"
+            element={
+              <ProtectedRoute role="admin">
+                <Layout>
+                  <CandidatesPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/classrooms"
+            element={
+              <ProtectedRoute role="admin">
+                <Layout>
+                  <ClassroomsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/onlinesessions"
+            element={
+              <ProtectedRoute role="admin">
+                <Layout>
+                  <OnlineSessionsPage />
+                </Layout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reportedquestions"
             element={
               <ProtectedRoute>
                 <Layout>

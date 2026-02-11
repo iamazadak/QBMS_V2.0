@@ -117,7 +117,7 @@ function AddCandidateModal({ isOpen, onClose, candidate, programs, courses, onSa
         <DialogHeader>
           <DialogTitle>{candidate ? "Edit Candidate" : "Add New Candidate"}</DialogTitle>
         </DialogHeader>
-       
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -130,7 +130,7 @@ function AddCandidateModal({ isOpen, onClose, candidate, programs, courses, onSa
                 className="mt-1"
               />
             </div>
-           
+
             <div>
               <Label htmlFor="email">Email *</Label>
               <Input
@@ -156,7 +156,7 @@ function AddCandidateModal({ isOpen, onClose, candidate, programs, courses, onSa
                 className="mt-1"
               />
             </div>
-           
+
             <div>
               <Label htmlFor="student_id">Student ID</Label>
               <Input
@@ -189,7 +189,7 @@ function AddCandidateModal({ isOpen, onClose, candidate, programs, courses, onSa
                 </SelectContent>
               </Select>
             </div>
-           
+
             <div>
               <Label htmlFor="course">Course *</Label>
               <Select
@@ -263,7 +263,7 @@ function AddCandidateModal({ isOpen, onClose, candidate, programs, courses, onSa
                 </PopoverContent>
               </Popover>
             </div>
-           
+
             <div>
               <Label htmlFor="status">Status</Label>
               <Select
@@ -289,7 +289,7 @@ function AddCandidateModal({ isOpen, onClose, candidate, programs, courses, onSa
             <Button type="button" variant="outline" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading} variant="primary">
               {isLoading ? "Saving..." : candidate ? "Update Candidate" : "Add Candidate"}
             </Button>
           </DialogFooter>

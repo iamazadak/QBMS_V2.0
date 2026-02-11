@@ -73,7 +73,7 @@ export function LoginForm() {
           required
         />
       </div>
-      <Button type="submit" disabled={loading} className="w-full text-white font-bold py-2 px-4 rounded-full" style={{ backgroundColor: '#008080' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#006666'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#008080'}>
+      <Button type="submit" disabled={loading} className="w-full" variant="primary">
         {loading ? 'Signing in...' : 'Sign In'}
       </Button>
       <div className="w-full flex justify-center mt-4">

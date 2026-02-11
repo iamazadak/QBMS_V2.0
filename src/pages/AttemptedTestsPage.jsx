@@ -113,7 +113,7 @@ export default function AttemptedTestsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4">Loading attempted tests...</p>
@@ -127,68 +127,52 @@ export default function AttemptedTestsPage() {
     <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
       {/* Header */}
       <div className="mb-8">
-        <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900`}>Attempted Tests</h1>
-        <p className={`text-slate-600 mt-2 ${isMobile ? 'text-sm' : ''}`}>Track your test performance and progress</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">Attempted Assessments</h1>
+        <p className="text-slate-500 font-medium text-base">Track your assessment performance and academic progress</p>
       </div>
 
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-violet-50 rounded-xl">
-                <FileText className="w-6 h-6 text-violet-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Total Tests</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.totalTests}</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Ribbon */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 p-2 mb-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-violet-50 text-violet-600 rounded-2xl">
+            <FileText className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{stats.totalTests}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Assessments</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-emerald-50 rounded-xl">
-                <TrendingUp className="w-6 h-6 text-emerald-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Average Score</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.avgScore}%</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+            <TrendingUp className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{stats.avgScore}%</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Average Score</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-amber-50 rounded-xl">
-                <Target className="w-6 h-6 text-amber-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Best Score</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{stats.bestScore}%</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+            <Target className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{stats.bestScore}%</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Best Score</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-rose-50 rounded-xl">
-                <Clock className="w-6 h-6 text-rose-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Total Time</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{Math.round(stats.totalTime / 60)}h</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl">
+            <Clock className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{Math.round(stats.totalTime / 60)}h</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Time</p>
+          </div>
+        </div>
       </div>
 
 
@@ -197,10 +181,10 @@ export default function AttemptedTestsPage() {
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
           <Input
-            placeholder="Search attempted tests..."
+            placeholder="Search attempted assessments..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-11 bg-white border-slate-200 focus:ring-2 focus:ring-teal-500/20 rounded-xl"
           />
         </div>
       </div>
@@ -211,11 +195,11 @@ export default function AttemptedTestsPage() {
         <Card className="text-center py-16">
           <CardContent>
             <Trophy className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">No attempted tests found</h3>
-            <p className="text-slate-600 mb-6">Start taking tests to see your performance history here</p>
-            <Button className="bg-teal-600 hover:bg-teal-700">
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">No attempted assessments found</h3>
+            <p className="text-slate-600 mb-6">Start taking assessments to see your performance history here</p>
+            <Button variant="primary">
               <FileText className="w-4 h-4 mr-2" />
-              Browse Available Tests
+              Browse Available Assessments
             </Button>
           </CardContent>
         </Card>
@@ -228,8 +212,8 @@ export default function AttemptedTestsPage() {
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-lg font-semibold text-slate-900">
-                          {attempt.exam?.title || "Test"}
+                        <h3 className="text-lg font-bold text-slate-900">
+                          {attempt.exam?.title || "Assessment"}
                         </h3>
                         <Badge variant="secondary" className={getScoreBadgeColor(attempt.percentage)}>
                           {attempt.percentage?.toFixed(1)}%
@@ -267,7 +251,7 @@ export default function AttemptedTestsPage() {
                         View Details
                       </Button>
                       <Button variant="outline" size="sm">
-                        Retake Test
+                        Retake Assessment
                       </Button>
                     </div>
                   </div>
@@ -279,7 +263,7 @@ export default function AttemptedTestsPage() {
           {/* Pagination Controls */}
           <div className="flex flex-col md:flex-row justify-between items-center mt-8 gap-4">
             <div className="text-sm text-slate-600">
-              Showing {Math.min(filteredTests.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredTests.length, currentPage * itemsPerPage)} of {filteredTests.length} attempted tests
+              Showing {Math.min(filteredTests.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredTests.length, currentPage * itemsPerPage)} of {filteredTests.length} attempted assessments
             </div>
             <div className="flex items-center space-x-2">
               <Button

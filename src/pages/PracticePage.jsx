@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Target, Play, Settings, Timer, BookOpen, Brain, TrendingUp, Zap } from "lucide-react";
+import { Target, Play, Settings, Timer, BookOpen, Brain, TrendingUp, Zap, FileText, Trophy } from "lucide-react";
+import KpiCard from "@/components/shared/KpiCard";
 import { Question, Subject, Course, Program } from "@/entities/all";
 import {
   Dialog,
@@ -124,7 +125,8 @@ export default function PracticePage() {
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const subjectsData = await Subject.list();
+      const subjectEntity = new Subject();
+      const subjectsData = await subjectEntity.list();
       setSubjects(subjectsData);
 
       // Mock practice stats - in real app this would come from user's practice history
@@ -188,7 +190,7 @@ export default function PracticePage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4">Loading practice sessions...</p>
@@ -199,78 +201,62 @@ export default function PracticePage() {
 
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Practice Sessions</h1>
-          <p className="text-slate-600 mt-2">Improve your skills with targeted practice</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">Practice Assessments</h1>
+          <p className="text-slate-500 font-medium text-base">Improve your skills with targeted assessment practice</p>
         </div>
 
-        <Button onClick={() => setShowCustomSession(true)} className="bg-teal-600 hover:bg-teal-700">
-          <Settings className="w-4 h-4 mr-2" />
-          Custom Session
+        <Button onClick={() => setShowCustomSession(true)} variant="primary">
+          <Settings className="w-4 h-4 mr-2 stroke-[3]" />
+          Custom Assessment
         </Button>
       </div>
 
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-violet-50 rounded-xl">
-                <Target className="w-6 h-6 text-violet-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Total Sessions</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{practiceStats.totalSessions}</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Ribbon */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 p-2 mb-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-violet-50 text-violet-600 rounded-2xl">
+            <Target className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{practiceStats.totalSessions}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Sessions</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-emerald-50 rounded-xl">
-                <TrendingUp className="w-6 h-6 text-emerald-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Average Score</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{practiceStats.averageScore}%</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+            <TrendingUp className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{practiceStats.averageScore}%</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Avg Score</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-amber-50 rounded-xl">
-                <Timer className="w-6 h-6 text-amber-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Time Spent</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{Math.round(practiceStats.timeSpent / 60)}h</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+            <Timer className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{Math.round(practiceStats.timeSpent / 60)}h</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Time Spent</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-rose-50 rounded-xl">
-                <BookOpen className="w-6 h-6 text-rose-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Questions Done</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{practiceStats.questionsAttempted}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl">
+            <BookOpen className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{practiceStats.questionsAttempted.toLocaleString()}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Questions</p>
+          </div>
+        </div>
       </div>
 
 
@@ -284,42 +270,50 @@ export default function PracticePage() {
               {predefinedSessions.map((session) => {
                 const IconComponent = session.icon;
                 return (
-                  <Card key={session.id} className="hover:shadow-lg transition-all duration-300 border-slate-200/60">
-                    <CardHeader className="pb-4">
-                      <div className="flex items-center justify-between">
-                        <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${session.color} flex items-center justify-center`}>
-                          <IconComponent className="w-6 h-6 text-white" />
+                  <Card key={session.id} className="group hover:shadow-2xl transition-all duration-500 border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-[2.5rem] overflow-hidden bg-white">
+                    <CardHeader className="pb-4 pt-8 px-8">
+                      <div className="flex items-center justify-between mb-6">
+                        <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${session.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+                          <IconComponent className="w-7 h-7 text-white" />
                         </div>
                         {session.popular && (
-                          <Badge className="bg-yellow-100 text-yellow-800">Popular</Badge>
+                          <Badge className="bg-teal-500 text-white font-black text-[10px] uppercase tracking-widest px-3 py-1.5 rounded-full shadow-md">
+                            <Zap className="w-3 h-3 mr-1" /> HOT
+                          </Badge>
                         )}
                       </div>
-                      <CardTitle className="text-lg">{session.name}</CardTitle>
-                      <p className="text-slate-600 text-sm">{session.description}</p>
+                      <CardTitle className="text-xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-teal-600 transition-colors">
+                        {session.name}
+                      </CardTitle>
+                      <p className="text-slate-400 text-xs font-medium mt-2 leading-relaxed italic">
+                        {session.description}
+                      </p>
                     </CardHeader>
 
-                    <CardContent>
-                      <div className="space-y-2 mb-4 text-sm text-slate-600">
-                        <div className="flex items-center justify-between">
-                          <span>Questions:</span>
-                          <span className="font-medium">{session.questions}</span>
+                    <CardContent className="px-8 pb-8 pt-2">
+                      <div className="grid grid-cols-3 gap-2 mb-8">
+                        <div className="text-center p-3 bg-slate-50 rounded-2xl border border-slate-100/50 group-hover:bg-white group-hover:border-teal-100 transition-all">
+                          <p className="text-xs font-black text-slate-900">{session.questions}</p>
+                          <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Ques</p>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span>Time:</span>
-                          <span className="font-medium">{session.time} min</span>
+                        <div className="text-center p-3 bg-slate-50 rounded-2xl border border-slate-100/50 group-hover:bg-white group-hover:border-teal-100 transition-all">
+                          <p className="text-xs font-black text-slate-900">{session.time}m</p>
+                          <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Time</p>
                         </div>
-                        <div className="flex items-center justify-between">
-                          <span>Difficulty:</span>
-                          <span className="font-medium capitalize">{session.difficulty}</span>
+                        <div className="text-center p-3 bg-slate-50 rounded-2xl border border-slate-100/50 group-hover:bg-white group-hover:border-teal-100 transition-all">
+                          <p className="text-xs font-black text-slate-900">{session.difficulty[0].toUpperCase()}</p>
+                          <p className="text-[8px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">Diff</p>
                         </div>
                       </div>
 
                       <Button
                         onClick={() => handleStartSession(session.id)}
-                        className="w-full bg-slate-900 hover:bg-slate-800"
+                        variant="primary"
+                        size="lg"
+                        className="w-full group-hover:-translate-y-1"
                       >
-                        <Play className="w-4 h-4 mr-2" />
-                        Start Session
+                        <Play className="w-4 h-4 mr-2 fill-current" />
+                        START ASSESSMENT
                       </Button>
                     </CardContent>
                   </Card>
@@ -335,7 +329,7 @@ export default function PracticePage() {
           {/* Recent Sessions */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-lg">Recent Sessions</CardTitle>
+              <CardTitle className="text-lg font-bold text-slate-900">Recent Assessments</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {recentSessions.map((session) => (
@@ -528,7 +522,7 @@ export default function PracticePage() {
             <Button variant="outline" onClick={() => setShowCustomSession(false)}>
               Cancel
             </Button>
-            <Button onClick={handleCreateCustomSession} className="bg-teal-600 hover:bg-teal-700">
+            <Button onClick={handleCreateCustomSession} variant="primary">
               Start Practice Session
             </Button>
           </DialogFooter>

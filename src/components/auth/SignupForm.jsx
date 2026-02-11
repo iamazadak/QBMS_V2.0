@@ -127,7 +127,7 @@ export function SignupForm() {
           </SelectContent>
         </Select>
       </div>
-      <Button type="submit" disabled={loading} className="w-full text-white font-bold py-2 px-4 rounded-full" style={{ backgroundColor: '#008080' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#006666'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#008080'}>
+      <Button type="submit" disabled={loading} className="w-full" variant="primary">
         {loading ? 'Creating Account...' : 'Sign Up'}
       </Button>
       {message && <p className="text-sm text-red-500 mt-4">{message}</p>}

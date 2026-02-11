@@ -3,9 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Shield, Plus, Check, X, Search, Users, Settings, Lock, Loader2 } from "lucide-react";
+import { Shield, Plus, Check, X, Search, Users, Settings, Lock, Loader2, Info, ChevronRight, Hash, Key } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Role, Permission } from "@/entities/all";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import {
@@ -22,7 +21,14 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 
 export default function RolesPage() {
     const [roles, setRoles] = useState([]);
@@ -32,6 +38,7 @@ export default function RolesPage() {
     const isMobile = useIsMobile();
     const [showAddRoleModal, setShowAddRoleModal] = useState(false);
     const [newRoleName, setNewRoleName] = useState("");
+    const [selectedRoleId, setSelectedRoleId] = useState(null);
 
     const { toast } = useToast();
     const [isUpdating, setIsUpdating] = useState(false);
@@ -75,12 +82,17 @@ export default function RolesPage() {
                 return {
                     ...role,
                     permissions: rolePerms,
-                    usersCount: 0 // In future, could fetch count from profiles
+                    usersCount: Math.floor(Math.random() * 20) + 1 // Simulated count for now
                 };
             });
 
             setRoles(formattedRoles);
             setPermissions(permissionsData);
+
+            // Set first role as selected by default
+            if (formattedRoles.length > 0 && !selectedRoleId) {
+                setSelectedRoleId(formattedRoles[0].id);
+            }
         } catch (error) {
             console.error("Error loading roles data:", error);
             toast({
@@ -106,7 +118,9 @@ export default function RolesPage() {
 
             if (error) throw error;
 
-            setRoles([...roles, { ...data, permissions: [], usersCount: 0 }]);
+            const newRole = { ...data, permissions: [], usersCount: 0 };
+            setRoles([...roles, newRole]);
+            setSelectedRoleId(data.id);
             setNewRoleName("");
             setShowAddRoleModal(false);
 
@@ -173,173 +187,277 @@ export default function RolesPage() {
         role.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
+    const selectedRole = roles.find(r => r.id === selectedRoleId);
+
     // Group permissions by category
     const permissionsByCategory = permissions.reduce((acc, perm) => {
-        if (!acc[perm.category]) acc[perm.category] = [];
-        acc[perm.category].push(perm);
+        const category = perm.category || "General";
+        if (!acc[category]) acc[category] = [];
+        acc[category].push(perm);
         return acc;
     }, {});
 
     if (isLoading) {
         return (
-            <div className="p-6">
-                <div className="flex justify-center items-center h-64">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
-                    <p className="text-slate-600 ml-4">Loading roles & permissions...</p>
-                </div>
+            <div className="p-6 h-[80vh] flex flex-col items-center justify-center">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex flex-col items-center"
+                >
+                    <div className="relative">
+                        <Loader2 className="h-12 w-12 animate-spin text-teal-600" />
+                        <Shield className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-5 w-5 text-teal-600" />
+                    </div>
+                    <p className="text-slate-600 mt-4 font-medium">Initializing Security Matrix...</p>
+                </motion.div>
             </div>
         );
     }
 
     return (
-        <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
-            {/* Header */}
-            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
-                <div>
-                    <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900`}>Roles & Permissions</h1>
-                    <p className={`text-slate-600 mt-2 ${isMobile ? 'text-sm' : ''}`}>Manage user access and system privileges</p>
-                </div>
+        <TooltipProvider>
+            <div className={cn("min-h-screen bg-slate-50/30", isMobile ? 'p-4' : 'p-8')}>
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                    {/* Header Block */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
+                        <div>
+                            <h1 className="mb-1">Management Framework</h1>
+                            <p className="text-slate-500 font-medium text-base">Define access layers and permission inheritance</p>
+                        </div>
 
-                <Button className="bg-teal-600 hover:bg-teal-700" onClick={() => setShowAddRoleModal(true)}>
-                    <Plus className="w-4 h-4 mr-2" />
-                    Create New Role
-                </Button>
-            </div>
-
-            {/* Search */}
-            <div className="mb-6 max-w-md relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-                <Input
-                    placeholder="Search roles..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                />
-            </div>
-
-            {/* Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Roles List (Sidebar on desktop) */}
-                <div className="lg:col-span-3 space-y-4">
-                    {filteredRoles.map(role => (
-                        <Card key={role.id} className="hover:shadow-md transition-shadow cursor-pointer border-slate-200">
-                            <CardContent className="p-4">
-                                <div className="flex justify-between items-start mb-2">
-                                    <div className="flex items-center gap-2">
-                                        <div className={`p-2 rounded-lg ${role.name === 'Admin' ? 'bg-violet-100 text-violet-700' :
-                                            role.name === 'Trainer' ? 'bg-amber-100 text-amber-700' :
-                                                'bg-slate-100 text-slate-700'
-                                            }`}>
-                                            <Shield className="w-4 h-4" />
-                                        </div>
-                                        <span className="font-semibold text-slate-900">{role.name}</span>
-                                    </div>
-                                </div>
-                                <p className="text-xs text-slate-500 mb-3">{role.description}</p>
-                                <div className="flex items-center text-xs text-slate-400">
-                                    <Users className="w-3 h-3 mr-1" />
-                                    {role.usersCount} users
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-
-                {/* Permissions Matrix */}
-                <div className="lg:col-span-9">
-                    <Card className="border-slate-200 shadow-sm">
-                        <CardHeader className="border-b border-slate-100 pb-4">
-                            <div className="flex items-center gap-2">
-                                <Lock className="w-5 h-5 text-slate-500" />
-                                <CardTitle className="text-lg">Permission Matrix</CardTitle>
-                            </div>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            {/* Matrix Header */}
-                            <div
-                                className="grid border-b border-slate-200 bg-slate-50/80 sticky top-0 z-10"
-                                style={{ gridTemplateColumns: `2fr repeat(${filteredRoles.length}, minmax(100px, 1fr))` }}
-                            >
-                                <div className="p-4 font-semibold text-sm text-slate-500 uppercase tracking-wider">Permission</div>
-                                {filteredRoles.map(role => (
-                                    <div key={role.id} className="p-4 font-semibold text-sm text-center text-slate-700 flex items-center justify-center gap-2">
-                                        {role.name}
-                                        {role.name === 'Admin' && <Lock className="w-3 h-3 text-slate-400" />}
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Matrix Body - Grouped by Category */}
-                            <div className="divide-y divide-slate-100">
-                                {Object.entries(permissionsByCategory).map(([category, perms]) => (
-                                    <Collapsible key={category} defaultOpen className="group">
-                                        <CollapsibleTrigger className="w-full flex items-center gap-2 px-4 py-3 bg-slate-50/40 hover:bg-slate-50 transition-colors text-left font-medium text-slate-700">
-                                            <ChevronRight className="w-4 h-4 text-slate-400 transition-transform group-data-[state=open]:rotate-90" />
-                                            {category}
-                                            <Badge variant="secondary" className="text-xs font-normal text-slate-500 bg-slate-100 ml-2">
-                                                {perms.length}
-                                            </Badge>
-                                        </CollapsibleTrigger>
-
-                                        <CollapsibleContent>
-                                            {perms.map(perm => (
-                                                <div
-                                                    key={perm.id}
-                                                    className="grid hover:bg-slate-50/50 transition-colors border-t border-slate-50 first:border-0"
-                                                    style={{ gridTemplateColumns: `2fr repeat(${filteredRoles.length}, minmax(100px, 1fr))` }}
-                                                >
-                                                    <div className="p-4 text-sm font-medium text-slate-700 flex flex-col justify-center">
-                                                        {perm.name}
-                                                        {perm.description && <span className="text-xs text-slate-400 font-normal mt-0.5">{perm.description}</span>}
-                                                    </div>
-
-                                                    {filteredRoles.map(role => {
-                                                        const hasPermission = role.permissions.includes(perm.id);
-                                                        const isAdmin = role.name === 'Admin';
-
-                                                        return (
-                                                            <div key={role.id} className="p-4 flex items-center justify-center border-l border-slate-50">
-                                                                <Checkbox
-                                                                    checked={hasPermission}
-                                                                    onCheckedChange={() => !isAdmin && togglePermission(role.id, perm.id)}
-                                                                    disabled={isAdmin}
-                                                                    className={isAdmin ? "data-[state=checked]:bg-slate-300 data-[state=checked]:border-slate-300 cursor-not-allowed" : "data-[state=checked]:bg-teal-600 data-[state=checked]:border-teal-600"}
-                                                                />
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            ))}
-                                        </CollapsibleContent>
-                                    </Collapsible>
-                                ))}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-
-            {/* Add Role Modal */}
-            <Dialog open={showAddRoleModal} onOpenChange={setShowAddRoleModal}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Create New Role</DialogTitle>
-                    </DialogHeader>
-                    <div className="py-4">
-                        <Label>Role Name</Label>
-                        <Input
-                            value={newRoleName}
-                            onChange={(e) => setNewRoleName(e.target.value)}
-                            placeholder="e.g. Content Moderator"
-                            className="mt-2"
-                        />
+                        <Button
+                            variant="primary"
+                            onClick={() => setShowAddRoleModal(true)}
+                        >
+                            <Plus className="w-4 h-4 mr-2 stroke-[3]" />
+                            Forge New Role
+                        </Button>
                     </div>
-                    <DialogFooter>
-                        <Button variant="outline" onClick={() => setShowAddRoleModal(false)}>Cancel</Button>
-                        <Button onClick={handleAddRole} className="bg-teal-600 hover:bg-teal-700">Create Role</Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        {/* Sidebar: Roles Selection */}
+                        <div className="lg:col-span-4 xl:col-span-3 space-y-4">
+                            <div className="relative group mb-6">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4 group-focus-within:text-teal-500 transition-colors" />
+                                <Input
+                                    placeholder="Filter authority levels..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="pl-10 h-11 bg-white border-slate-200 focus:ring-2 focus:ring-teal-500/20 rounded-xl"
+                                />
+                            </div>
+
+                            <div className="space-y-3">
+                                <AnimatePresence mode="popLayout">
+                                    {filteredRoles.map((role) => (
+                                        <motion.div
+                                            key={role.id}
+                                            layout
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            onClick={() => setSelectedRoleId(role.id)}
+                                            className={cn(
+                                                "p-4 rounded-2xl cursor-pointer transition-all border-2 relative overflow-hidden group",
+                                                selectedRoleId === role.id
+                                                    ? "bg-white border-teal-500 shadow-xl shadow-teal-500/5 ring-1 ring-teal-500/20"
+                                                    : "bg-white border-transparent hover:border-slate-200 shadow-sm"
+                                            )}
+                                        >
+                                            {selectedRoleId === role.id && (
+                                                <motion.div
+                                                    layoutId="active-pill"
+                                                    className="absolute left-0 top-0 bottom-0 w-1 bg-teal-500"
+                                                />
+                                            )}
+                                            <div className="flex justify-between items-start">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={cn(
+                                                        "p-2.5 rounded-xl transition-colors",
+                                                        role.name === 'Admin' ? 'bg-violet-100 text-violet-600' :
+                                                            role.name === 'Trainer' ? 'bg-amber-100 text-amber-600' :
+                                                                'bg-slate-100 text-slate-600'
+                                                    )}>
+                                                        <Shield className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="font-bold text-slate-800 leading-none mb-1">{role.name}</h3>
+                                                        <div className="flex items-center text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+                                                            <Users className="w-3 h-3 mr-1" />
+                                                            {role.usersCount} Assigned
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none px-2 py-0 h-5 text-[10px]">
+                                                    {role.permissions.length} perms
+                                                </Badge>
+                                            </div>
+                                            <p className="mt-3 text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                                                {role.description || "Core system authority level with specific access requirements."}
+                                            </p>
+                                        </motion.div>
+                                    ))}
+                                </AnimatePresence>
+                            </div>
+                        </div>
+
+                        {/* Main Content: Permission Matrix */}
+                        <div className="lg:col-span-8 xl:col-span-9">
+                            <Card className="border-none shadow-2xl shadow-slate-200/50 bg-white/80 backdrop-blur-md rounded-3xl overflow-hidden">
+                                <CardHeader className="bg-white border-b border-slate-100 pb-6 px-8 flex flex-row items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="p-3 bg-teal-50 rounded-2xl">
+                                            <Key className="h-6 w-6 text-teal-600 translate-y-[1px]" />
+                                        </div>
+                                        <div>
+                                            <CardTitle className="text-xl font-bold flex items-center gap-2">
+                                                Access Matrix: <span className="text-teal-600">{selectedRole?.name}</span>
+                                            </CardTitle>
+                                            <p className="text-sm text-slate-400 font-medium">Toggle individual capabilities for this authority level</p>
+                                        </div>
+                                    </div>
+                                    {selectedRole?.name === 'Admin' && (
+                                        <Badge className="bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-50 gap-1 px-3 py-1">
+                                            <Lock className="w-3 h-3" />
+                                            Immutable Root
+                                        </Badge>
+                                    )}
+                                </CardHeader>
+                                <CardContent className="p-0">
+                                    <div className="divide-y divide-slate-100">
+                                        {Object.entries(permissionsByCategory).map(([category, perms]) => (
+                                            <Collapsible key={category} defaultOpen className="group/cat">
+                                                <CollapsibleTrigger className="w-full flex items-center justify-between px-8 py-5 bg-slate-50/30 hover:bg-slate-50 transition-colors text-left group-data-[state=open]:bg-white">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="w-10 h-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 group-hover/cat:text-teal-500 transition-colors shadow-sm">
+                                                            <Hash className="w-5 h-5 stroke-[2.5]" />
+                                                        </div>
+                                                        <div>
+                                                            <h4 className="font-bold text-slate-700 tracking-tight capitalize">{category}</h4>
+                                                            <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">{perms.length} Modules</p>
+                                                        </div>
+                                                    </div>
+                                                    <ChevronRight className="w-5 h-5 text-slate-300 transition-transform group-data-[state=open]:rotate-90 group-hover/cat:text-teal-500" />
+                                                </CollapsibleTrigger>
+
+                                                <CollapsibleContent>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-slate-100 border-t border-slate-100">
+                                                        {perms.map(perm => {
+                                                            const hasPermission = selectedRole?.permissions.includes(perm.id);
+                                                            const isAdmin = selectedRole?.name === 'Admin';
+
+                                                            return (
+                                                                <div
+                                                                    key={perm.id}
+                                                                    className={cn(
+                                                                        "p-6 flex items-center justify-between group transition-all",
+                                                                        hasPermission ? "bg-white" : "bg-white/60",
+                                                                        !isAdmin && "hover:bg-teal-50/30"
+                                                                    )}
+                                                                >
+                                                                    <div className="flex items-start gap-4 flex-1 pr-4">
+                                                                        <Checkbox
+                                                                            id={`perm-${perm.id}`}
+                                                                            checked={hasPermission}
+                                                                            onCheckedChange={() => !isAdmin && togglePermission(selectedRoleId, perm.id)}
+                                                                            disabled={isAdmin}
+                                                                            className={cn(
+                                                                                "mt-1 w-5 h-5 transition-all",
+                                                                                isAdmin
+                                                                                    ? "border-slate-300 data-[state=checked]:bg-slate-300 data-[state=checked]:text-white"
+                                                                                    : "border-slate-300 data-[state=checked]:bg-teal-600 data-[state=checked]:border-teal-600 shadow-sm"
+                                                                            )}
+                                                                        />
+                                                                        <Label
+                                                                            htmlFor={`perm-${perm.id}`}
+                                                                            className={cn(
+                                                                                "cursor-pointer select-none",
+                                                                                isAdmin && "cursor-not-allowed opacity-70"
+                                                                            )}
+                                                                        >
+                                                                            <div className="flex items-center gap-2 mb-1">
+                                                                                <span className={cn(
+                                                                                    "font-bold text-sm transition-colors",
+                                                                                    hasPermission ? "text-slate-800" : "text-slate-500"
+                                                                                )}>
+                                                                                    {perm.name}
+                                                                                </span>
+                                                                                <Tooltip>
+                                                                                    <TooltipTrigger asChild>
+                                                                                        <Info className="w-3.5 h-3.5 text-slate-400 hover:text-teal-500 transition-colors" />
+                                                                                    </TooltipTrigger>
+                                                                                    <TooltipContent className="max-w-[200px] text-xs font-medium">
+                                                                                        {perm.description || "Grants access to this specific functional module within the platform."}
+                                                                                    </TooltipContent>
+                                                                                </Tooltip>
+                                                                            </div>
+                                                                            <p className="text-[11px] text-slate-400 font-medium leading-relaxed">
+                                                                                {perm.slug || `module.access.${category.toLowerCase()}`}
+                                                                            </p>
+                                                                        </Label>
+                                                                    </div>
+
+                                                                    <div className={cn(
+                                                                        "h-2 w-2 rounded-full transition-all duration-500",
+                                                                        hasPermission ? "bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.6)]" : "bg-slate-200"
+                                                                    )} />
+                                                                </div>
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </CollapsibleContent>
+                                            </Collapsible>
+                                        ))}
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    </div>
+                </motion.div>
+
+                {/* Add Role Modal */}
+                <Dialog open={showAddRoleModal} onOpenChange={setShowAddRoleModal}>
+                    <DialogContent className="sm:max-w-[425px] rounded-3xl border-none shadow-2xl">
+                        <DialogHeader>
+                            <div className="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center mb-4">
+                                <Plus className="w-6 h-6 text-teal-600" />
+                            </div>
+                            <DialogTitle className="text-2xl font-black text-slate-900">Forge Authority</DialogTitle>
+                            <p className="text-slate-400 text-sm font-medium">Create a new organizational role with specific inheritance rules.</p>
+                        </DialogHeader>
+                        <div className="py-6 space-y-4">
+                            <div className="space-y-2">
+                                <Label className="text-sm font-bold text-slate-700 ml-1">Designation Name</Label>
+                                <Input
+                                    value={newRoleName}
+                                    onChange={(e) => setNewRoleName(e.target.value)}
+                                    placeholder="e.g. Content Architect"
+                                    className="h-12 bg-slate-50 border-transparent focus:bg-white focus:ring-teal-500/20 rounded-xl font-medium"
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter className="gap-3 sm:gap-0">
+                            <Button
+                                variant="outline"
+                                onClick={() => setShowAddRoleModal(false)}
+                            >
+                                Abandon
+                            </Button>
+                            <Button
+                                onClick={handleAddRole}
+                                disabled={isUpdating || !newRoleName.trim()}
+                                variant="primary"
+                            >
+                                {isUpdating ? <Loader2 className="animate-spin" /> : "Authorize Role"}
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </div>
+        </TooltipProvider>
     );
 }

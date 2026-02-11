@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import AddClassroomModal from "@/components/classrooms/AddClassroomModal";
 import AssignTestModal from "@/components/classrooms/AssignTestModal";
 import ManageCandidatesModal from "@/components/classrooms/ManageCandidatesModal";
+import KpiCard from "@/components/shared/KpiCard";
 import {
   Dialog,
   DialogContent,
@@ -176,7 +177,7 @@ export default function ClassroomsPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6">
         <Card>
           <CardContent className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
@@ -188,7 +189,7 @@ export default function ClassroomsPage() {
   }
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
         <div>
@@ -197,75 +198,61 @@ export default function ClassroomsPage() {
         </div>
         <div className="flex flex-wrap gap-3">
           {selectedClassrooms.length > 0 && (
-            <Button onClick={handleAssignTest} className="bg-green-600 hover:bg-green-700">
+            <Button onClick={handleAssignTest} variant="secondary">
               <BookOpen className="w-4 h-4 mr-2" />
               Assign Test ({selectedClassrooms.length})
             </Button>
           )}
-          <Button onClick={() => setShowAddModal(true)} className="bg-teal-600 hover:bg-teal-700">
+          <Button onClick={() => setShowAddModal(true)} variant="primary">
             <Plus className="w-4 h-4 mr-2" />
             Create Classroom
           </Button>
         </div>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
-        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="p-2 md:p-4 bg-violet-50 rounded-xl">
-                <Users className="w-4 h-4 md:w-6 md:h-6 text-violet-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Total Classrooms</p>
-              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{classrooms.length}</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Ribbon */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 p-2 mb-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-violet-50 text-violet-600 rounded-2xl">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{classrooms.length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Cohorts</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="p-2 md:p-4 bg-emerald-50 rounded-xl">
-                <CheckCircle className="w-4 h-4 md:w-6 md:h-6 text-emerald-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Active</p>
-              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{classrooms.filter((c) => c.is_active).length}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+            <CheckCircle className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{classrooms.filter((c) => c.is_active).length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Live Now</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="p-2 md:p-4 bg-blue-50 rounded-xl">
-                <Users className="w-4 h-4 md:w-6 md:h-6 text-blue-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Total Students</p>
-              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{classrooms.reduce((sum, c) => sum + (c.candidateCount || 0), 0)}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">
+              {classrooms.reduce((sum, c) => sum + (c.candidateCount || 0), 0)}
+            </p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Students</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-xl border border-slate-100 shadow-sm">
-          <CardContent className="p-4 md:p-6">
-            <div className="flex items-center justify-between mb-2 md:mb-4">
-              <div className="p-2 md:p-4 bg-amber-50 rounded-xl">
-                <BookOpen className="w-4 h-4 md:w-6 md:h-6 text-amber-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-xs md:text-sm font-medium">Programs</p>
-              <p className="text-xl md:text-3xl font-bold text-slate-900 mt-1">{programs.length}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+            <BookOpen className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{programs.length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Programs</p>
+          </div>
+        </div>
       </div>
 
       {/* Search and Filters */}
@@ -334,7 +321,8 @@ export default function ClassroomsPage() {
                         <p className="text-sm mt-2">Create your first classroom to get started.</p>
                         <Button
                           onClick={() => setShowAddModal(true)}
-                          className="mt-4 bg-teal-600 hover:bg-teal-700"
+                          variant="primary"
+                          className="mt-4"
                         >
                           <Plus className="w-4 h-4 mr-2" />
                           Create Classroom
@@ -388,7 +376,7 @@ export default function ClassroomsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-8 w-8 rounded-xl"
                             onClick={() => handleManageCandidates(classroom)}
                             title="Manage Students"
                           >
@@ -397,7 +385,7 @@ export default function ClassroomsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-8 w-8 rounded-xl"
                             asChild
                             title="View Details"
                           >
@@ -408,7 +396,7 @@ export default function ClassroomsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-8 w-8 rounded-xl"
                             onClick={() => {
                               setEditingClassroom(classroom);
                               setShowAddModal(true);
@@ -419,7 +407,7 @@ export default function ClassroomsPage() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-red-500 hover:text-red-700"
+                            className="h-8 w-8 rounded-xl text-red-500 hover:text-red-700"
                             onClick={() => handleDeleteClassroom(classroom.id)}
                           >
                             <Trash2 className="h-4 w-4" />

@@ -15,8 +15,12 @@ import {
   Filter,
   CheckCircle2,
   Clock,
-  BookOpen
+  BookOpen,
+  LogOut,
+  Archive,
+  Download
 } from 'lucide-react';
+import KpiCard from '@/components/shared/KpiCard';
 
 const questionPaperEntity = new QuestionPaper();
 const subjectEntity = new Subject();
@@ -117,61 +121,36 @@ const CreatedQuestionPapersPage = () => {
   }), [questionPapers]);
 
   return (
-    <div className="max-w-[1600px] mx-auto p-8">
+    <div className="p-8">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-10">
         <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-indigo-100 rounded-lg">
-              <BookOpen className="w-6 h-6 text-indigo-700" />
-            </div>
-            <h1 className="text-4xl font-bold text-slate-900 tracking-tight">Created Question Papers</h1>
-          </div>
+          <h1 className="mb-1">Created Question Papers</h1>
           <p className="text-slate-500 font-medium text-lg">Manage and download your generated question papers</p>
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-        <Card className="bg-white rounded-3xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 overflow-hidden group">
-          <CardContent className="p-0">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-indigo-50 rounded-2xl group-hover:bg-indigo-600 transition-colors duration-300">
-                  <FileText className="w-6 h-6 text-indigo-600 group-hover:text-white transition-colors duration-300" />
-                </div>
-                <div className="text-right">
-                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Storage</span>
-                </div>
-              </div>
-              <div>
-                <p className="text-3xl font-black text-slate-900">{stats.total}</p>
-                <p className="text-slate-500 text-sm font-semibold mt-1">Total PDFs Created</p>
-              </div>
-            </div>
-            <div className="h-1.5 w-full bg-indigo-600"></div>
-          </CardContent>
-        </Card>
+      {/* Stats Ribbon */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 p-2 mb-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+            <FileText className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{stats.total}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total PDFs</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-3xl border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-all duration-300 overflow-hidden group">
-          <CardContent className="p-0">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="p-3 bg-emerald-50 rounded-2xl group-hover:bg-emerald-600 transition-colors duration-300">
-                  <CheckCircle2 className="w-6 h-6 text-emerald-600 group-hover:text-white transition-colors duration-300" />
-                </div>
-                <div className="text-right">
-                  <span className="text-xs font-bold text-emerald-500 uppercase tracking-wider">New</span>
-                </div>
-              </div>
-              <div>
-                <p className="text-3xl font-black text-slate-900">{stats.recent}</p>
-                <p className="text-slate-500 text-sm font-semibold mt-1">Created this week</p>
-              </div>
-            </div>
-            <div className="h-1.5 w-full bg-emerald-600"></div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+            <CheckCircle2 className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{stats.recent}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Recent Files</p>
+          </div>
+        </div>
       </div>
 
       {/* Filters Section */}

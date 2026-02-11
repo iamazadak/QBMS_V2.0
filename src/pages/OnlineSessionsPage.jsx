@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Video, Calendar, Clock, Users, Play, Plus, Search, Grid3x3, List } from "lucide-react";
+import { Video, Calendar, Clock, Users, Play, Plus, Search, Grid3x3, List, Zap } from "lucide-react";
 import { OnlineSession, OnlineSessionAttendee, Program, Course, Subject, User } from "@/entities/all";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, startOfWeek, endOfWeek, addMonths, subMonths, startOfYear, endOfYear } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import CreateSessionModal from "../components/onlineSessions/CreateSessionModal";
 import SessionCalendarView from "../components/onlineSessions/SessionCalendarView";
+import KpiCard from "@/components/shared/KpiCard";
 
 
 export default function OnlineSessionsPage() {
@@ -172,7 +173,7 @@ export default function OnlineSessionsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="">
         {/* Header */}
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8">
           <div>
@@ -204,7 +205,7 @@ export default function OnlineSessionsPage() {
             {isAdmin && (
               <Button
                 onClick={() => setShowCreateModal(true)}
-                className="bg-teal-600 hover:bg-teal-700"
+                variant="primary"
               >
                 <Plus className="w-5 h-5 mr-2" />
                 Create Session
@@ -214,55 +215,48 @@ export default function OnlineSessionsPage() {
         </div>
 
 
-        {/* Stats Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <Card className="bg-gradient-to-r from-teal-500 to-teal-600 text-white border-none">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-blue-100">Upcoming</p>
-                  <p className="text-2xl font-bold">{counts.upcoming}</p>
-                </div>
-                <Calendar className="w-8 h-8 text-blue-200" />
-              </div>
-            </CardContent>
-          </Card>
+        {/* Stats Ribbon */}
+        <div className="bg-white rounded-[2rem] border border-slate-100 p-2 mb-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+          <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+            <div className="p-3 bg-teal-50 text-teal-600 rounded-2xl">
+              <Calendar className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xl font-black text-slate-900 leading-none">{counts.upcoming}</p>
+              <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Upcoming</p>
+            </div>
+          </div>
 
-          <Card className="bg-gradient-to-r from-red-500 to-red-600 text-white border-none">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-red-100">Live Now</p>
-                  <p className="text-2xl font-bold">{counts.live}</p>
-                </div>
-                <Video className="w-8 h-8 text-red-200" />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+            <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl relative">
+              <Video className="w-5 h-5" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-rose-500 rounded-full border-2 border-white animate-pulse"></div>
+            </div>
+            <div>
+              <p className="text-xl font-black text-slate-900 leading-none">{counts.live}</p>
+              <p className="text-subscript uppercase tracking-[0.1em] mt-1.5 leading-none">Live Now</p>
+            </div>
+          </div>
 
-          <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-none">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-green-100">Completed</p>
-                  <p className="text-2xl font-bold">{counts.completed}</p>
-                </div>
-                <Play className="w-8 h-8 text-green-200" />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl">
+              <Play className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xl font-black text-slate-900 leading-none">{counts.completed}</p>
+              <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Completed</p>
+            </div>
+          </div>
 
-          <Card className="bg-gradient-to-r from-purple-500 to-purple-600 text-white border-none">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-purple-100">Total Hours</p>
-                  <p className="text-2xl font-bold">{counts.totalHours}</p>
-                </div>
-                <Clock className="w-8 h-8 text-purple-200" />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+            <div className="p-3 bg-violet-50 text-violet-600 rounded-2xl">
+              <Clock className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xl font-black text-slate-900 leading-none">{counts.totalHours}</p>
+              <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Hours</p>
+            </div>
+          </div>
         </div>
 
 
@@ -337,7 +331,7 @@ export default function OnlineSessionsPage() {
                     </p>
                     {isAdmin && (
                       <Button
-                        className="bg-teal-600 hover:bg-teal-700"
+                        variant="primary"
                         onClick={() => setShowCreateModal(true)}
                       >
                         <Plus className="w-4 h-4 mr-2" />
@@ -468,7 +462,8 @@ function SessionCard({ session, onRefresh }) {
           <div className="flex gap-2">
             {isLive ? (
               <Button
-                className="flex-1 bg-red-600 hover:bg-red-700"
+                variant="destructive"
+                className="flex-1"
                 onClick={handleJoin}
               >
                 <Play className="w-4 h-4 mr-2" />

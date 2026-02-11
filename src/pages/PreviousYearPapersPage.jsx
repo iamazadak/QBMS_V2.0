@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Archive, Search, Calendar, FileText, Clock, Users, Download, Eye, Star } from "lucide-react";
+import { Archive, Search, Calendar, FileText, Clock, Users, Download, Eye, Star, Zap, Trash2, Edit, Play } from "lucide-react";
+import KpiCard from "@/components/shared/KpiCard";
 import { Exam, Subject, Course, Program } from "@/entities/all";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -124,14 +125,17 @@ export default function PreviousYearPapersPage() {
     setIsLoading(true);
     try {
       // Load exams that are marked as previous year papers
-      const exams = await Exam.list("-created_date");
+      const examEntity = new Exam();
+      const subjectEntity = new Subject();
+
+      const exams = await examEntity.list("-created_date");
       const previousYearPapers = exams.filter(exam =>
         exam.exam_type === 'previous_year' ||
         exam.title?.toLowerCase().includes('previous year') ||
         exam.title?.toLowerCase().includes('past paper')
       );
 
-      const subjects = await Subject.list();
+      const subjects = await subjectEntity.list();
       setSubjects(subjects);
 
       // If no specific previous year papers exist, create some mock data for demonstration
@@ -230,7 +234,7 @@ export default function PreviousYearPapersPage() {
 
   if (isLoading) {
     return (
-      <div className="p-6 max-w-7xl mx-auto">
+      <div className="p-6">
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-600"></div>
           <p className="text-slate-600 ml-4">Loading previous year papers...</p>
@@ -244,71 +248,56 @@ export default function PreviousYearPapersPage() {
     <div className={`${isMobile ? 'p-4' : 'p-6'}`}>
       {/* Header */}
       <div className="mb-8">
-        <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-slate-900`}>Previous Year Papers</h1>
-        <p className={`text-slate-600 mt-2 ${isMobile ? 'text-sm' : ''}`}>Practice with authentic exam papers from previous years</p>
+        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">Previous Year Assessments</h1>
+        <p className="text-slate-500 font-medium text-base">Practice with authentic assessment items from previous years</p>
       </div>
 
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-violet-50 rounded-xl">
-                <Archive className="w-6 h-6 text-violet-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Total Papers</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{papers.length}</p>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Stats Ribbon */}
+      <div className="bg-white rounded-[2rem] border border-slate-100 p-2 mb-10 shadow-[0_8px_30px_rgb(0,0,0,0.02)] flex items-center overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl">
+            <Archive className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{papers.length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Assessments</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-emerald-50 rounded-xl">
-                <Calendar className="w-6 h-6 text-emerald-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Years Covered</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{getYearOptions().length}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-teal-50 text-teal-600 rounded-2xl">
+            <Calendar className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">{getYearOptions().length}</p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Years Covered</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-amber-50 rounded-xl">
-                <Users className="w-6 h-6 text-amber-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Total Attempts</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{papers.reduce((sum, paper) => sum + (paper.attempts || 0), 0)}</p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 border-r border-slate-100 min-w-max">
+          <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl">
+            <Users className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">
+              {papers.reduce((sum, paper) => sum + (paper.attempts || 0), 0).toLocaleString()}
+            </p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Total Attempts</p>
+          </div>
+        </div>
 
-        <Card className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="p-4 bg-rose-50 rounded-xl">
-                <Star className="w-6 h-6 text-rose-600" />
-              </div>
-            </div>
-            <div>
-              <p className="text-slate-500 text-sm font-medium">Avg Score</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">
-                {papers.length > 0 ?
-                  Math.round(papers.reduce((sum, paper) => sum + (paper.average_score || 0), 0) / papers.length) : 0}%
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="flex items-center gap-4 px-8 py-3 min-w-max">
+          <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl">
+            <Star className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xl font-black text-slate-900 leading-none">
+              {`${papers.length > 0 ? Math.round(papers.reduce((sum, paper) => sum + (paper.average_score || 0), 0) / papers.length) : 0}%`}
+            </p>
+            <p className="text-subscript uppercase tracking-[0.1em] mt-1.5">Avg Score</p>
+          </div>
+        </div>
       </div>
 
 
@@ -317,15 +306,15 @@ export default function PreviousYearPapersPage() {
         <div className="relative lg:col-span-2">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
           <Input
-            placeholder="Search papers by title, subject, or course..."
+            placeholder="Search assessments by title, subject, or course..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-11 bg-white border-slate-200 focus:ring-2 focus:ring-teal-500/20 rounded-xl"
           />
         </div>
 
         <Select value={yearFilter} onValueChange={setYearFilter}>
-          <SelectTrigger>
+          <SelectTrigger className="h-11 rounded-xl bg-white border-slate-200">
             <SelectValue placeholder="Year" />
           </SelectTrigger>
           <SelectContent>
@@ -337,7 +326,7 @@ export default function PreviousYearPapersPage() {
         </Select>
 
         <Select value={subjectFilter} onValueChange={setSubjectFilter}>
-          <SelectTrigger>
+          <SelectTrigger className="h-11 rounded-xl bg-white border-slate-200">
             <SelectValue placeholder="Subject" />
           </SelectTrigger>
           <SelectContent>
@@ -349,7 +338,7 @@ export default function PreviousYearPapersPage() {
         </Select>
 
         <Select value={difficultyFilter} onValueChange={setDifficultyFilter}>
-          <SelectTrigger>
+          <SelectTrigger className="h-11 rounded-xl bg-white border-slate-200">
             <SelectValue placeholder="Difficulty" />
           </SelectTrigger>
           <SelectContent>
@@ -367,81 +356,74 @@ export default function PreviousYearPapersPage() {
         <Card className="text-center py-16">
           <CardContent>
             <Archive className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">No papers found</h3>
+            <h3 className="text-xl font-semibold text-slate-900 mb-2">No assessments found</h3>
             <p className="text-slate-600 mb-6">
               {searchTerm || yearFilter !== "all" || subjectFilter !== "all" || difficultyFilter !== "all"
                 ? "Try adjusting your search filters"
-                : "Previous year papers will appear here once added to the system"}
+                : "Previous year assessments will appear here once added to the system"}
             </p>
-            <Button className="bg-teal-600 hover:bg-teal-700">
+            <Button variant="primary">
               <Archive className="w-4 h-4 mr-2" />
-              Browse All Papers
+              Browse All Assessments
             </Button>
           </CardContent>
         </Card>
       ) : (
         <>
-          <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-2 lg:grid-cols-3 gap-6'}`}>
+          <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-2 lg:grid-cols-3 gap-8'}`}>
             {paginatedPapers.map((paper) => (
-              <Card key={paper.id} className="hover:shadow-lg transition-shadow duration-300 border-slate-200/60">
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between">
+              <Card key={paper.id} className="group transition-all duration-500 border-none shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgb(0,0,0,0.08)] rounded-[2.5rem] overflow-hidden bg-white">
+                <CardHeader className="pb-4 pt-8 px-8">
+                  <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <CardTitle className="text-lg font-semibold text-slate-900 mb-2 line-clamp-2">
-                        {paper.title}
-                      </CardTitle>
-                      <div className="flex flex-wrap gap-2">
-                        <Badge variant="outline" className="text-teal-600">
-                          {paper.year}
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge variant="outline" className="text-teal-600 border-teal-100 font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-full bg-teal-50">
+                          PYP {paper.year}
                         </Badge>
-                        <Badge variant="secondary" className={getDifficultyColor(paper.difficulty)}>
-                          {paper.difficulty?.toUpperCase()}
+                        <Badge variant="secondary" className={`${getDifficultyColor(paper.difficulty)} font-black text-[10px] uppercase tracking-widest px-3 py-1 rounded-full`}>
+                          {paper.difficulty}
                         </Badge>
                       </div>
+                      <CardTitle className="text-xl font-black text-slate-900 tracking-tight leading-tight group-hover:text-teal-600 transition-colors line-clamp-2">
+                        {paper.title}
+                      </CardTitle>
                     </div>
                   </div>
                 </CardHeader>
 
-                <CardContent>
-                  <div className="space-y-3 mb-6">
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <FileText className="w-4 h-4" />
-                      <span>{paper.subject} • {paper.course}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <Clock className="w-4 h-4" />
-                      <span>{paper.total_questions} Questions • {paper.duration_minutes ? `${paper.duration_minutes} min` : 'N/A'}</span>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-sm text-slate-600">
-                      <Users className="w-4 h-4" />
-                      <span>{paper.total_marks} Marks • {paper.attempts || 0} Attempts</span>
-                    </div>
-
-                    {paper.average_score && (
-                      <div className="flex items-center gap-2 text-sm text-slate-600">
-                        <Star className="w-4 h-4" />
-                        <span>Avg Score: {paper.average_score}%</span>
+                <CardContent className="px-8 pb-8">
+                  <div className="space-y-4 mb-8">
+                    <div className="flex items-center gap-3 text-xs text-slate-500 font-bold italic">
+                      <div className="p-2 bg-slate-50 rounded-lg">
+                        <FileText className="w-4 h-4 text-slate-400" />
                       </div>
-                    )}
+                      <span className="line-clamp-1">{paper.subject} • {paper.course}</span>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="flex items-center gap-2 text-[11px] text-slate-500 font-bold">
+                        <Clock className="w-4 h-4 text-amber-500" />
+                        <span>{paper.total_questions} Ques • {paper.duration_minutes}m</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-[11px] text-slate-500 font-bold">
+                        <Users className="w-4 h-4 text-indigo-500" />
+                        <span>{paper.attempts} Attempts</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button variant="outline" className="flex-1">
-                      <Eye className="w-4 h-4 mr-2" />
-                      Preview
+                  <div className="flex gap-3">
+                    <Button variant="outline" size="lg" className="flex-1 text-xs px-0">
+                      <Eye className="w-4 h-4 mr-2" /> PREVIEW
                     </Button>
-                    <Button className="flex-1 bg-teal-600 hover:bg-teal-700">
-                      <FileText className="w-4 h-4 mr-2" />
-                      Start Test
+                    <Button variant="primary" size="lg" className="flex-1 text-xs px-0">
+                      <Play className="w-4 h-4 mr-2" /> START TEST
                     </Button>
                   </div>
 
-                  <div className="mt-4 pt-4 border-t border-slate-100">
-                    <Button variant="ghost" size="sm" className="w-full">
-                      <Download className="w-4 h-4 mr-2" />
-                      Download PDF
+                  <div className="mt-6 pt-6 border-t border-dashed border-slate-100">
+                    <Button variant="ghost" size="sm" className="w-full text-slate-400 font-black text-[10px] tracking-widest">
+                      <Download className="w-3.5 h-3.5 mr-2" /> DOWNLOAD OFFICIAL PDF
                     </Button>
                   </div>
                 </CardContent>
@@ -452,7 +434,7 @@ export default function PreviousYearPapersPage() {
           {/* Pagination Controls */}
           <div className="flex flex-col md:flex-row justify-between items-center mt-8 gap-4">
             <div className="text-sm text-slate-600">
-              Showing {Math.min(filteredPapers.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredPapers.length, currentPage * itemsPerPage)} of {filteredPapers.length} papers
+              Showing {Math.min(filteredPapers.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredPapers.length, currentPage * itemsPerPage)} of {filteredPapers.length} assessments
             </div>
             <div className="flex items-center space-x-2">
               <Button

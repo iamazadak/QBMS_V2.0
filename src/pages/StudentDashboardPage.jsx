@@ -43,7 +43,7 @@ const StudentDashboardPage = () => {
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900">Student Dashboard</h1>
+        <h1>Student Dashboard</h1>
         <p className="text-slate-600 mt-2">
           Welcome back, {profile?.full_name || 'Student'}! Ready to learn?
         </p>
