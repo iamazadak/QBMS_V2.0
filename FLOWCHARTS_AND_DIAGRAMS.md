@@ -132,6 +132,8 @@ erDiagram
     QUESTIONS ||--o{ TEST_QUESTIONS : contains
     QUESTIONS ||--o{ SAVED_QUESTIONS : referenced_by
     QUESTIONS ||--o{ REPORTED_QUESTIONS : flagged_as
+    QUESTIONS }o--|| COMPETENCIES : has
+    SUBJECTS ||--o{ COMPETENCIES : contains
     
     TESTS ||--o{ TEST_QUESTIONS : includes
     TESTS ||--o{ TEST_ATTEMPTS : attempted_by
@@ -153,6 +155,7 @@ erDiagram
     QUESTIONS {
         uuid id PK
         uuid created_by FK
+        uuid competency_id FK
         string question_text
         string subject
         string difficulty
@@ -160,6 +163,14 @@ erDiagram
         string correct_answer
         timestamp created_at
     }
+
+    COMPETENCIES {
+        uuid id PK
+        uuid subject_id FK
+        string name
+        timestamp created_at
+    }
+
     
     TESTS {
         uuid id PK

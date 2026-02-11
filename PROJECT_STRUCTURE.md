@@ -43,6 +43,7 @@ Reusable UI components and feature-specific components.
 - **/onlineSessions**: Online session components.
 - **/papertemplates**: Paper template components.
 - **/questions**: Question management components.
+- **/shared**: Shared utility components (e.g., `KpiCard.jsx`).
 - **/ui**: Generic UI components (likely from a library like shadcn/ui).
 
 ### /src/pages

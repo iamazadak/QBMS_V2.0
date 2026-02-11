@@ -36,7 +36,9 @@ The application uses **Supabase Auth** for user management.
 - Questions
 - Tests/Quizzes
 - Classrooms
+- Classrooms
 - Student Results
+- Competencies (linked to Subjects)
 
 ### 3.3 External Integrations
 - **Google Forms / Apps Script**:
@@ -53,10 +55,11 @@ The application uses **Supabase Auth** for user management.
 
 ### 4.2 Question Management
 - **Features**:
-    - **Browse Questions**: `QuestionsPage.jsx`
+    - **Browse Questions**: `QuestionsPage.jsx` with real-time filtering by Program, Course, Subject, and **Competency**.
+    - **Competency Tracking**: Granular association of questions with specific competencies derived from the WMS Module List.
     - **Saved Questions**: `SavedQuestionsPage.jsx` - Bookmarked for later.
     - **Reported Questions**: `ReportedQuestionsPage.jsx` - Flagged for errors.
-    - **Import/Export**: Functionality to handle bulk question data (likely via CSV/Excel).
+    - **Import/Export**: Bulk upload support with automatic competency resolution from CSV.
 
 ### 4.3 Assessments & Tests
 - **Live Tests**: `LiveTestsPage.jsx` - Real-time scheduled exams.
