@@ -10,9 +10,44 @@
  * }
  */
 
+function doGet(e) {
+  return ContentService.createTextOutput(JSON.stringify({
+    status: "active",
+    message: "Generic Assessment Creator GAS is running. Use POST to create assessments."
+  })).setMimeType(ContentService.MimeType.JSON);
+}
+
 function doPost(e) {
   try {
-    const data = JSON.parse(e.postData.contents);
+    let rawInput = "";
+    
+    // 1. Check for standard form parameter
+    if (e.parameter && e.parameter.payload) {
+      rawInput = e.parameter.payload;
+    } 
+    // 2. Check for raw POST contents
+    else if (e.postData && e.postData.contents) {
+      const contents = e.postData.contents;
+      // If it's a form-encoded string like "payload=...", extract it
+      if (contents.indexOf('payload=') === 0) {
+        rawInput = decodeURIComponent(contents.substring(8).replace(/\+/g, ' '));
+      } else {
+        rawInput = contents;
+      }
+    }
+
+    if (!rawInput) throw new Error("No data received in request contents.");
+
+    // Clean any remaining encoding or wrapping (First Principles)
+    let jsonString = rawInput;
+    const firstBrace = jsonString.indexOf('{');
+    const lastBrace = jsonString.lastIndexOf('}');
+    
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      jsonString = jsonString.substring(firstBrace, lastBrace + 1);
+    }
+
+    const data = JSON.parse(jsonString);
     const meta = data.assessment_meta || {};
     const studentFields = data.student_fields || {};
     const questions = data.questions || [];
