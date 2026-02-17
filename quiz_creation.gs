@@ -18,15 +18,18 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  console.log("doPost triggered");
   try {
     let rawInput = "";
     
     // 1. Check for standard form parameter
     if (e.parameter && e.parameter.payload) {
+      console.log("Found payload in parameter");
       rawInput = e.parameter.payload;
     } 
     // 2. Check for raw POST contents
     else if (e.postData && e.postData.contents) {
+      console.log("Found payload in postData.contents (Length: " + e.postData.contents.length + ")");
       const contents = e.postData.contents;
       // If it's a form-encoded string like "payload=...", extract it
       if (contents.indexOf('payload=') === 0) {
@@ -35,6 +38,8 @@ function doPost(e) {
         rawInput = contents;
       }
     }
+    
+    console.log("Raw Input Extracted. First 100 chars: " + (rawInput ? rawInput.substring(0, 100) : "null"));
 
     if (!rawInput) throw new Error("No data received in request contents.");
 
@@ -52,7 +57,10 @@ function doPost(e) {
     const studentFields = data.student_fields || {};
     const questions = data.questions || [];
 
+    console.log("Parsing complete. Questions count: " + questions.length);
+
     // 1. Create the Form
+    console.log("Creating form with title: " + (meta.title || 'New Assessment'));
     const form = FormApp.create(meta.title || 'New Assessment');
     form.setIsQuiz(true);
     form.setAllowResponseEdits(false);
@@ -64,8 +72,9 @@ function doPost(e) {
     if (meta.course_name) description += "\nCourse: " + meta.course_name;
     form.setDescription(description);
 
+    console.log("Form created (ID: " + form.getId() + ")");
+
     // Advanced Form Settings
-    // Apply defaults or values from meta
     if (meta.collect_emails !== undefined) form.setCollectEmail(meta.collect_emails);
     if (meta.limit_response !== undefined) form.setLimitOneResponsePerUser(meta.limit_response);
     if (meta.edit_after_submit !== undefined) form.setAllowResponseEdits(meta.edit_after_submit);
@@ -80,10 +89,12 @@ function doPost(e) {
     // ---------------------------------------------------------
     let sheetUrl = "";
     if (meta.link_to_sheet) {
+       console.log("Attempting to link to spreadsheet...");
        try {
          const ss = SpreadsheetApp.create(meta.title + " (Responses)");
          form.setDestination(FormApp.DestinationType.SPREADSHEET, ss.getId());
          sheetUrl = ss.getUrl();
+         console.log("Spreadsheet linked: " + sheetUrl);
        } catch (err) {
          console.warn("Failed to create spreadsheet", err);
        }
@@ -95,6 +106,7 @@ function doPost(e) {
     
     // Add Multimedia (Intro Video/Image) at the top of Section 1 if present
     if (meta.video_url) {
+      console.log("Adding video: " + meta.video_url);
       try {
         form.addVideoItem().setVideoUrl(meta.video_url).setTitle("Introductory Video");
       } catch (err) {
@@ -102,6 +114,7 @@ function doPost(e) {
       }
     }
     if (meta.image_url) {
+       console.log("Adding banner image: " + meta.image_url);
        try {
         form.addImageItem().setImage(UrlFetchApp.fetch(meta.image_url)).setTitle("Assessment Banner");
       } catch (err) {
@@ -111,11 +124,12 @@ function doPost(e) {
 
     // Add Student Fields
     if (studentFields.full_name) {
+      console.log("Adding Full Name field");
       form.addTextItem().setTitle("Full Name").setRequired(true);
     }
     
     if (studentFields.mobile) {
-      // Add validation for Mobile Number (Must be a number)
+      console.log("Adding Mobile Number field");
       const mobileValidation = FormApp.createTextValidation()
         .setHelpText('Please enter a valid mobile number.')
         .requireNumber()
@@ -128,6 +142,7 @@ function doPost(e) {
     }
     
     if (studentFields.industry) {
+      console.log("Adding Industry field");
       form.addTextItem().setTitle("Industry/Company Name").setRequired(true);
     }
 
@@ -141,7 +156,9 @@ function doPost(e) {
     // SECTION 2: QUESTIONS
     // ---------------------------------------------------------
 
-    questions.forEach((q) => {
+    console.log("Processing " + questions.length + " questions...");
+    questions.forEach((q, index) => {
+      console.log("Adding question " + (index+1) + ": " + q.question_text.substring(0, 30) + "...");
       const item = form.addMultipleChoiceItem();
       item.setTitle(q.question_text)
           .setPoints(q.marks || 1)
@@ -149,10 +166,6 @@ function doPost(e) {
 
       const choices = [];
       const options = q.options || {};
-      
-      // Shuffle options locally if needed, but FormApp.setShuffleQuestions handles question order.
-      // Option order is typically fixed unless we code randomization here.
-      // Keeping it simple: Render order as received.
       
       Object.keys(options).forEach(key => {
         const isCorrect = (key === q.correct_option);
@@ -167,6 +180,8 @@ function doPost(e) {
         item.setFeedbackForIncorrect(feedback);
       }
     });
+
+    console.log("All questions added. Compiling response...");
 
     const response = {
       status: "success",
